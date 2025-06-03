@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3010', 'http://localhost:8080'],
+  origin: ['http://localhost:3000', 'http://localhost:3010', 'http://localhost:8080', 'https://medivize.netlify.app'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
