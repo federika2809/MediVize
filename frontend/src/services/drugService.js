@@ -1,5 +1,5 @@
 // MEDIVIZE/frontend/src/services/drugService.js
-const API_BASE_URL = 'http://localhost:8080/api'; 
+const API_BASE_URL = 'https://medivize-backend.netlify.app/api'; 
 
 export const classifyDrugImage = async (imageFile) => {
   const formData = new FormData();
