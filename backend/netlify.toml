@@ -1,0 +1,21 @@
+# netlify.toml
+
+[build]
+  # Perintah build untuk proyek frontend Anda (jika ada).
+  # Jika hanya Express.js, Anda bisa gunakan perintah sederhana.
+  command = "npm install" # Cukup pastikan semua dependensi terinstal
+  publish = "public"      # Atau folder statis Anda jika ada frontend
+
+[functions]
+  # KUNCI PERUBAHAN: Tentukan direktori functions Anda di sini
+  directory = "functions"
+  # Opsional: untuk performa yang lebih baik, Netlify merekomendasikan ini
+  external_node_modules = ["express"]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  # Mengarahkan semua permintaan ke /api/* ke Netlify Function Anda
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat" # ":splat" meneruskan sisa path
+  status = 200
+  force = true
