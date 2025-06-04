@@ -220,7 +220,7 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
 
   // ML API Configuration
   // Updated to use your Flask ML API endpoint
-  const ML_API_URL = 'https://medivize-backend.netlify.app/predict'; 
+  const ML_API_URL = 'https://federika-my-drug-classifier-api.hf.space/predict'; 
 
   const ML_API_USERNAME = 'testuser'; // Credentials for your ML API
   const ML_API_PASSWORD = 'testpass'; // Credentials for your ML API
