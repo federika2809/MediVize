@@ -1,4 +1,4 @@
-// MEDIVIZE/frontend/src/pages/DrugDetailPage.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDrugByName, debugDrugSearch } from '../services/drugService';
@@ -6,8 +6,7 @@ import DrugInfoCard from '../components/drug/DrugInfoCard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 function DrugDetailPage() {
-    // --- PERBAIKAN UTAMA DI SINI ---
-    // Gunakan 'id' karena itulah nama parameter di rute App.jsx
+    
     const { id } = useParams(); 
     const navigate = useNavigate();
     const [drug, setDrug] = useState(null);
@@ -17,7 +16,7 @@ function DrugDetailPage() {
 
     useEffect(() => {
         const fetchDrugDetails = async () => {
-            // Validasi awal untuk memastikan 'id' (yang sebenarnya adalah nama obat) ada
+            
             if (!id) { 
                 console.error('URL parameter "id" (nama obat) is undefined or empty.');
                 setError('Nama obat tidak valid atau tidak ditemukan di URL. Kembali ke halaman utama.');
@@ -29,8 +28,7 @@ function DrugDetailPage() {
             setError('');
 
             try {
-                // Dekode 'id' yang sebenarnya adalah nama obat dari URL.
-                // Ini akan menangani spasi atau karakter khusus yang di-encodeURIComponent.
+                
                 const decodedDrugName = decodeURIComponent(id); 
 
                 console.log('=== DRUG DETAIL PAGE DEBUG ===');
@@ -38,18 +36,14 @@ function DrugDetailPage() {
                 console.log('Decoded Drug Name for Search:', decodedDrugName);
                 console.log('Fetching drug details for:', decodedDrugName);
 
-                // Normalisasi nama obat untuk pencarian (opsional, tergantung backend)
-                // Jika backend Anda case-sensitive dan butuh huruf kapital di awal, bisa gunakan:
-                // const searchName = decodedDrugName.charAt(0).toUpperCase() + decodedDrugName.slice(1).toLowerCase();
-                // Saat ini, kita akan menggunakan decodedDrugName langsung
+                
                 const searchName = decodedDrugName;
 
-                // Jalankan debug untuk mendapatkan info komprehensif
                 const debugResult = await debugDrugSearch(searchName); 
                 setDebugInfo(debugResult);
                 console.log('Debug result:', debugResult);
 
-                // Coba dapatkan obat berdasarkan nama
+               
                 const result = await getDrugByName(searchName); 
                 console.log('getDrugByName result:', result);
 
@@ -58,7 +52,7 @@ function DrugDetailPage() {
                     setDrug(result.data);
                 } else {
                     console.log('✗ Drug not found');
-                    // Perbarui pesan error berdasarkan respons dari service
+                    
                     setError(result.message || `Obat "${searchName}" tidak ditemukan dalam database.`);
                 }
             } catch (err) {
@@ -70,12 +64,11 @@ function DrugDetailPage() {
         };
 
         fetchDrugDetails();
-        // --- PERBAIKAN DEPENDENCY ARRAY ---
-        // Jalankan ulang useEffect jika 'id' di URL berubah
+        
     }, [id]); 
 
     const handleGoBack = () => {
-        navigate(-1); // Kembali ke halaman sebelumnya
+        navigate(-1); 
     };
 
     const handleTryAgain = async () => {
@@ -83,13 +76,13 @@ function DrugDetailPage() {
         setError('');
         
         try {
-            // Pastikan 'id' tidak undefined sebelum mencoba lagi
-            if (!id) { // Gunakan 'id'
+          
+            if (!id) { 
                 setError('Tidak ada nama obat yang valid untuk dicoba lagi.');
                 setLoading(false);
                 return;
             }
-            const decodedDrugName = decodeURIComponent(id); // Gunakan 'id'
+            const decodedDrugName = decodeURIComponent(id); 
             const result = await getDrugByName(decodedDrugName);
             
             if (result.success && result.data) {
@@ -137,11 +130,11 @@ function DrugDetailPage() {
                         </div>
                         <p className="text-red-700 mb-4">{error}</p>
                         
-                        {/* Show debug info in development */}
+                       
                         {process.env.NODE_ENV === 'development' && debugInfo && (
                             <div className="mt-4 p-4 bg-gray-100 rounded text-left text-sm">
                                 <p><strong>Connection Status:</strong> {debugInfo.connection?.success ? '✓ OK' : '✗ Failed'}</p>
-                                {/* Menampilkan message jika ada */}
+                              
                                 {debugInfo.connection?.data?.message && <p><strong>Server Message:</strong> {debugInfo.connection.data.message}</p>}
                                 <p><strong>Search Result:</strong> {debugInfo.search?.success ? `✓ Found ${debugInfo.search?.data?.length || 0} items` : `✗ Failed (${debugInfo.search?.message || 'No message'})`}</p>
                                 <p><strong>Direct Fetch:</strong> {debugInfo.direct?.success ? '✓ Success' : `✗ Failed (${debugInfo.direct?.message || 'No message'})`}</p>

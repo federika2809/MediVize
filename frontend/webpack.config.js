@@ -79,7 +79,7 @@ module.exports = (env, argv) => {
             from: path.resolve(__dirname, 'public'),
             to: path.resolve(__dirname, 'dist'),
             globOptions: {
-              ignore: ['**/index.html'], // penting: hindari konflik dengan HtmlWebpackPlugin
+              ignore: ['**/index.html'], 
             },
           },
         ],

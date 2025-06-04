@@ -150,7 +150,7 @@ function CameraInput({ onImageSelected }) {
                 </div>
             ) : (
                 <div className="mb-4 text-gray-500 text-center">
-                    <p>Unggah gambar kemasan obat atau gunakan kamera.</p>
+                    <p> Gunakan kamera atau Unggah gambar kemasan obat.</p>
                     <p className="text-sm">(Pastikan gambar jelas dan fokus)</p>
                 </div>
             )}

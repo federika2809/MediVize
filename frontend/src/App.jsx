@@ -3,13 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/common/Header';
 import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
-import ClassificationPage from './pages/ClassificationPage'; // Pastikan ini mengarah ke file yang sudah di-rename
+import ClassificationPage from './pages/ClassificationPage'; 
 import DrugDetailPage from './pages/DrugDetailPage';
 import GuidePage from './pages/GuidePage';
 import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import DisclaimerModal from './components/modal/DisclaimerModal';
-
+import DrugSearch from './pages/DrugSearch';
 function App() {
     const [showDisclaimer, setShowDisclaimer] = useState(false);
 
@@ -31,13 +31,14 @@ function App() {
                 <Header />
                 <main className="flex-grow container py-8">
                     <Routes>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/classify" element={<ClassificationPage />} />
-                        <Route path="/drug/:id" element={<DrugDetailPage />} />
-                        <Route path="/guide" element={<GuidePage />} />
-                        <Route path="/about" element={<AboutPage />} />
-                        <Route path="*" element={<NotFoundPage />} />
-                    </Routes>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/classify" element={<ClassificationPage />} />
+    <Route path="/search" element={<DrugSearch />} />
+    <Route path="/drug/:id" element={<DrugDetailPage />} />
+    <Route path="/guide" element={<GuidePage />} />
+    <Route path="/about" element={<AboutPage />} />
+    <Route path="*" element={<NotFoundPage />} />
+</Routes>
                 </main>
                 <Footer />
             </div>

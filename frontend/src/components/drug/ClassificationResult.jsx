@@ -1,4 +1,4 @@
-// MEDIVIZE/frontend/src/components/drug/ClassificationResult.jsx
+
 import React from 'react';
 import Button from '../common/Button';
 import { motion } from 'framer-motion';

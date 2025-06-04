@@ -87,7 +87,6 @@ const formatDrugData = (drugRow) => {
   };
 };
 
-// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -96,7 +95,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Get all drugs
 app.get('/api/drugs', async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM drugs ORDER BY Name ASC');
@@ -118,7 +116,6 @@ app.get('/api/drugs', async (req, res) => {
   }
 });
 
-// Get drug by name
 app.get('/api/drugs/by-name/:name', async (req, res) => {
   try {
     const { name } = req.params;
@@ -153,7 +150,6 @@ app.get('/api/drugs/by-name/:name', async (req, res) => {
   }
 });
 
-// Search drugs
 app.get('/api/drugs/search', async (req, res) => {
   try {
     const { q } = req.query;
@@ -189,7 +185,6 @@ app.get('/api/drugs/search', async (req, res) => {
   }
 });
 
-// Drug image classification
 app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -250,7 +245,6 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
   }
 });
 
-// Add new drug
 app.post('/api/drugs', async (req, res) => {
   try {
     const { name, size, type, purpose, dosage, howToUse, sideEffects, warnings } = req.body;
@@ -294,7 +288,6 @@ app.post('/api/drugs', async (req, res) => {
   }
 });
 
-// Update drug by name
 app.put('/api/drugs/by-name/:name', async (req, res) => {
   try {
     const { name } = req.params;
@@ -341,7 +334,6 @@ app.put('/api/drugs/by-name/:name', async (req, res) => {
   }
 });
 
-// Delete drug by name
 app.delete('/api/drugs/by-name/:name', async (req, res) => {
   try {
     const { name } = req.params;
@@ -370,7 +362,6 @@ app.delete('/api/drugs/by-name/:name', async (req, res) => {
   }
 });
 
-// Error handling middleware
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
@@ -389,7 +380,6 @@ app.use((error, req, res, next) => {
   });
 });
 
-// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,

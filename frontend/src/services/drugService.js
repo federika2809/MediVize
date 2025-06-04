@@ -1,4 +1,4 @@
-// MEDIVIZE/frontend/src/services/drugService.js
+
 const API_BASE_URL = 'https://medivize-backend.netlify.app/api'; 
 
 export const classifyDrugImage = async (imageFile) => {
@@ -40,10 +40,10 @@ export const getDrugByName = async (drugName) => {
       },
     });
 
-    console.log('Response status:', response.status); // Debug log
+    console.log('Response status:', response.status); 
     
     const data = await response.json();
-    console.log('Response data:', data); // Debug log
+    console.log('Response data:', data); 
 
     if (response.ok) {
       return { success: true, data: data.data };
@@ -106,7 +106,7 @@ export const getAllDrugs = async () => {
   }
 };
 
-// Additional utility functions for debugging
+
 export const testConnection = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/health`);
@@ -122,15 +122,15 @@ export const debugDrugSearch = async (drugName) => {
   console.log('=== DEBUG DRUG SEARCH ===');
   console.log('Searching for:', drugName);
   
-  // Test connection
+ 
   const connectionTest = await testConnection();
   console.log('Connection test:', connectionTest);
   
-  // Test search
+  
   const searchResult = await searchDrugs(drugName);
   console.log('Search result:', searchResult);
   
-  // Test direct fetch
+ 
   const directResult = await getDrugByName(drugName);
   console.log('Direct fetch result:', directResult);
   

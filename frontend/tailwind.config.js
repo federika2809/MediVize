@@ -6,10 +6,10 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Tambahkan utilitas tombol kustom
+      
       colors: {
-        primary: '#2563eb',   // biru Tailwind
-        secondary: '#e11d48', // merah Tailwind
+        primary: '#2563eb',   
+        secondary: '#e11d48', 
       },
     },
   },
