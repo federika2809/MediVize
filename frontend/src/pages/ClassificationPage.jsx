@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; // Assuming you use react-router
 import { motion } from 'framer-motion';
 import { Camera, Upload, AlertCircle, CheckCircle, Lightbulb, Search, Image as ImageIcon, Zap, Shield, Clock } from 'lucide-react';
+import { classifyDrugImage } from './services/drugService'; // Import from your service file
 
 // --- Mock Components (as provided by you, ensure they are styled or replace with actual UI library components) ---
 const CameraInput = ({ onImageSelected }) => {
@@ -82,13 +83,18 @@ const Button = ({ onClick, disabled, children, variant, className }) => (
     </button>
 );
 
+// Base URL for images, derived from your service's API_BASE_URL
+// drugService.js uses 'https://medivize-backend.netlify.app/api'
+// Images are served from '/uploads' relative to the domain.
+const IMAGE_BASE_URL = 'https://medivize-backend.netlify.app';
+
 const ClassificationResult = ({ result, onViewDetail }) => (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
         <h3 className="text-xl font-semibold text-gray-800 mb-3">Hasil Deteksi:</h3>
         {result.imageUrl && (
             <div className="mb-4">
                 <img 
-                    src={`http://localhost:8080${result.imageUrl}`} // Assumes Express backend is on localhost:8080
+                    src={`${IMAGE_BASE_URL}${result.imageUrl}`} // Use the production base URL for images
                     alt="Obat yang dideteksi" 
                     className="max-w-xs mx-auto rounded-lg shadow-md max-h-60 object-contain"
                     onError={(e) => { 
@@ -131,56 +137,6 @@ const ClassificationResult = ({ result, onViewDetail }) => (
 );
 // --- End Mock Components ---
 
-
-// --- API Configuration and Function ---
-// This URL should point to your Express backend's classification endpoint
-const API_URL = 'http://localhost:8080/api/drugs/classify'; 
-
-/**
- * Sends image to the Express backend for classification.
- * @param {File} imageFile - The image file to classify.
- * @returns {Promise<object>} - Promise resolving with classification result or error.
- */
-async function classifyDrugImage(imageFile) {
-    const formData = new FormData();
-    formData.append('image', imageFile); // Field name 'image' must match Express 'upload.single('image')'
-
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            body: formData,
-            // Headers like 'Content-Type: multipart/form-data' are set automatically by fetch for FormData
-        });
-
-        const responseData = await response.json().catch(err => {
-            console.error("Failed to parse API response as JSON:", err);
-            if (!response.ok) {
-                throw new Error(`API request failed with status ${response.status} and non-JSON response.`);
-            }
-            return { success: false, message: "API response was not valid JSON." }; 
-        });
-
-        if (!response.ok) {
-            const errorMessage = responseData.message || `API request failed with status ${response.status}`;
-            console.error('API Error Response:', { status: response.status, data: responseData, message: errorMessage });
-            return { success: false, message: errorMessage, errorData: responseData }; // Include errorData for more context
-        }
-        
-        // Expecting { success: true, data: { drugName, confidence, imageUrl, processedAt, drugDetails } }
-        return { success: true, data: responseData.data };
-
-    } catch (error) {
-        console.error('Network or other error in classifyDrugImage:', error);
-        let errorMessage = 'Terjadi kesalahan jaringan atau koneksi ke server gagal.';
-        if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
-             errorMessage = 'Gagal menghubungi server API. Pastikan server backend (Express) berjalan dan konfigurasi CORS sudah benar. Periksa juga koneksi internet Anda.';
-        } else if (error.message) {
-             errorMessage = `Kesalahan: ${error.message}.`;
-        }
-        return { success: false, message: errorMessage, error: error };
-    }
-}
-
 // --- Main Classification Page Component ---
 function ClassificationPage() {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -206,6 +162,7 @@ function ClassificationPage() {
         setClassificationResult(null);
 
         try {
+            // Use the imported classifyDrugImage function from drugService.js
             const result = await classifyDrugImage(selectedImage);
 
             if (result.success && result.data) {
@@ -215,15 +172,14 @@ function ClassificationPage() {
                     console.log("Obat terdeteksi:", result.data.drugName, "Menampilkan hasil di halaman ini.");
                 } else {
                     console.warn("API sukses, tapi obat tidak dikenali. Data:", result.data);
-                    // setError("Obat tidak dapat dikenali dari gambar yang diberikan. Hasil dari AI: " + (result.data.drugName || "Tidak ada nama"));
-                    // The ClassificationResult component will handle the "Tidak Dikenali" message based on drugName
+                    // The ClassificationResult component will handle the "Tidak Dikenali" message
                 }
             } else {
                 setError(result.message || 'Terjadi kesalahan saat klasifikasi gambar.');
                 console.error("Classification failed or API returned error:", result);
                 setClassificationResult(null);
             }
-        } catch (err) {
+        } catch (err) { // This catch is for unexpected errors in the try block itself, not API errors handled by classifyDrugImage
             setError('Terjadi kesalahan tak terduga saat memproses permintaan. Silakan coba lagi.');
             console.error('Unexpected error in handleClassify:', err);
             setClassificationResult(null);
@@ -540,21 +496,4 @@ function ClassificationPage() {
     );
 }
 
-// If this component is the main export of a file, e.g., App.js or ClassificationPage.js
-// For a typical setup, you might have an App.js that includes Routes
-// For this example, let's assume ClassificationPage is the main component to render.
-// You would typically wrap this in a Router in your main App.js
-// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-// const App = () => (
-//   <Router>
-//     <Routes>
-//       <Route path="/classify" element={<ClassificationPage />} />
-//       {/* Define other routes, e.g., for drug details: */}
-//       {/* <Route path="/drug/:drugName" element={<DrugDetailPage />} /> */}
-//       <Route path="/" element={<ClassificationPage />} /> {/* Default route */}
-//     </Routes>
-//   </Router>
-// );
-// export default App;
-
-export default ClassificationPage; // Exporting the page component directly
+export default ClassificationPage;
