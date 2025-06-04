@@ -13,15 +13,14 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // --- CORS Configuration ---
-// Ensure your React app's origin (e.g., http://localhost:3000) and the ML API's origin are allowed if necessary.
-// The ML API itself should have CORS configured to allow requests from your Express backend's domain/IP if they are different.
+// Defines which frontend origins can make requests to this Express backend
 app.use(cors({
   origin: [
-    'http://localhost:3000', // Default React dev port
-    'http://localhost:3010', // Another common React dev port
-    'http://localhost:8080', // The backend itself
-    'https://medivize.netlify.app', // Frontend production URL
-    'https://federika-my-drug-classifier-api.hf.space', // ML API URL - not needed here if Express calls it server-side
+    'http://localhost:3000',         // For local React development
+    'http://localhost:3010',         // Another local React development port
+    'http://localhost:8080',         // The backend itself (less common for direct browser access)
+    'https://medivize.netlify.app',  // Your deployed frontend URL
+    // The ML API URL was removed from here as it's not an origin that would call this Express server via browser.
   ],
   credentials: true
 }));
@@ -34,7 +33,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- Database Connection Pool ---
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'sql12.freesqldatabase.com', // Example: Free MySQL hosting
+  host: process.env.DB_HOST || 'sql12.freesqldatabase.com',
   user: process.env.DB_USER || 'sql12722940',
   password: process.env.DB_PASSWORD || 'x2wWCIpvYJ',
   database: process.env.DB_NAME || 'sql12722940',
@@ -52,7 +51,6 @@ pool.getConnection()
   })
   .catch(err => {
     console.error('✗ Database connection failed:', err.message);
-    // If you are using a free DB, it might be asleep. Try again later.
     if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
         console.error('Hint: Check if the database server is running and accessible. For free databases, they might go to sleep if inactive.');
     }
@@ -213,20 +211,17 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
   const imageUrl = `/uploads/${req.file.filename}`; // URL relative to this backend
 
   // ML API Configuration
-  // IMPORTANT: Choose the correct ML API URL.
-  // Option 1: Hugging Face (More likely for a deployed Flask model)
-  const ML_API_URL = 'https://federika-my-drug-classifier-api.hf.space/predict';
-  // Option 2: If your Netlify URL is indeed the Flask ML API
-  // const ML_API_URL = 'https://medivize-backend.netlify.app/predict';
+  // Updated to use your Flask ML API endpoint
+  const ML_API_URL = 'https://medivize-backend.netlify.app/predict'; 
 
-  const ML_API_USERNAME = 'testuser';
-  const ML_API_PASSWORD = 'testpass';
+  const ML_API_USERNAME = 'testuser'; // Credentials for your ML API
+  const ML_API_PASSWORD = 'testpass'; // Credentials for your ML API
 
   try {
     // 1. Prepare image data to send to ML API
     const imageFileStream = require('fs').createReadStream(imagePath);
     const formData = new FormData();
-    formData.append('file', imageFileStream, req.file.originalname);
+    formData.append('file', imageFileStream, req.file.originalname); // 'file' is the expected field name by your Flask ML API
 
     // 2. Call ML API
     console.log(`Calling ML API at ${ML_API_URL} for image: ${req.file.originalname}`);
@@ -240,25 +235,35 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
             timeout: 30000 // 30 seconds timeout for ML API
         });
     } catch (mlApiError) {
-        console.error('Error calling ML API:', mlApiError.response ? mlApiError.response.data : mlApiError.message);
+        console.error('Error calling ML API:', mlApiError.response ? JSON.stringify(mlApiError.response.data) : mlApiError.message);
         // Attempt to delete the uploaded file if ML API call fails early
-        await fs.unlink(imagePath).catch(e => console.error("Error deleting temp file after ML API failure:", e));
-        return res.status(500).json({
+        await fs.unlink(imagePath).catch(e => console.error("Error deleting temp file after ML API failure:", e.message));
+        
+        let userMessage = 'Gagal menghubungi layanan deteksi obat (ML API).';
+        if (mlApiError.response && mlApiError.response.data && mlApiError.response.data.message) {
+            userMessage = `ML API Error: ${mlApiError.response.data.message}`;
+        } else if (mlApiError.response && mlApiError.response.status) {
+            userMessage = `ML API Error: Status ${mlApiError.response.status}`;
+        } else if (mlApiError.code === 'ECONNABORTED') {
+            userMessage = 'Koneksi ke layanan deteksi obat (ML API) timeout.';
+        }
+
+        return res.status(500).json({ // Or a more appropriate status like 502 Bad Gateway or 504 Gateway Timeout
             success: false,
-            message: 'Gagal menghubungi layanan deteksi obat (ML API).',
-            error: mlApiError.response ? mlApiError.response.data : mlApiError.message
+            message: userMessage,
+            error: mlApiError.message // Keep original error message for server logs
         });
     }
     
-
     console.log('ML API Response:', mlResponse.data);
 
+    // Assuming ML API returns { "predicted_class": "...", "confidence": 0.xx, ... }
     const { predicted_class, confidence } = mlResponse.data;
 
     const classificationResult = {
       drugName: predicted_class || "Tidak Dikenali",
-      confidence: confidence || 0.0,
-      imageUrl: imageUrl, // Image served by this Express backend
+      confidence: confidence !== undefined ? parseFloat(confidence) : 0.0,
+      imageUrl: imageUrl, 
       processedAt: new Date().toISOString(),
       drugDetails: null
     };
@@ -277,7 +282,7 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
         }
       } catch (dbError) {
         console.error('Error searching drug in database after ML classification:', dbError);
-        // Non-fatal error, proceed without drugDetails
+        // Non-fatal error, proceed without drugDetails but maybe log it or inform client partially
       }
     }
 
@@ -287,10 +292,12 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
       data: classificationResult
     });
 
-  } catch (error) {
-    console.error('Error in image classification process:', error);
-    // Attempt to delete the uploaded file if an error occurs after ML API call but before response
-    await fs.unlink(imagePath).catch(e => console.error("Error deleting temp file after general failure:", e));
+  } catch (error) { // Catch errors from the broader try block (e.g., issues with fs before ML call)
+    console.error('Error in image classification process (outer try-catch):', error);
+    // Attempt to delete the uploaded file if it exists and an error occurs
+    if (imagePath) { // Check if imagePath was defined
+        await fs.unlink(imagePath).catch(e => console.error("Error deleting temp file after general failure:", e.message));
+    }
     res.status(500).json({
       success: false,
       message: 'Gagal memproses gambar secara keseluruhan.',
@@ -364,9 +371,8 @@ app.put('/api/drugs/by-name/:name', async (req, res) => {
 
     const sideEffectsStr = Array.isArray(sideEffects) ? sideEffects.join(', ') : sideEffects || '';
     const finalName = newName || decodedName;
-
-    // Ensure all fields from formatDrugData are considered for update
-    const currentDrugData = formatDrugData(existingRows[0]); // Get current data to fill defaults if not provided
+    
+    const currentDrugData = formatDrugData(existingRows[0]);
     
     const updateValues = [
         finalName,
@@ -375,10 +381,13 @@ app.put('/api/drugs/by-name/:name', async (req, res) => {
         purpose !== undefined ? purpose : currentDrugData.purpose,
         dosage !== undefined ? dosage : currentDrugData.dosage,
         howToUse !== undefined ? howToUse : currentDrugData.howToUse,
-        sideEffectsStr !== undefined ? sideEffectsStr : (currentDrugData.sideEffects ? currentDrugData.sideEffects.join(', ') : ''),
+        sideEffectsStr, // If sideEffects is not in body, this will be currentDrugData's sideEffects or ''
         warnings !== undefined ? warnings : currentDrugData.warnings,
-        decodedName // WHERE clause
+        decodedName
     ];
+    
+    // A more robust way to handle updates: build query based on provided fields
+    // For simplicity, current approach updates all fields, using existing values if new ones aren't provided.
 
     await pool.execute(
       'UPDATE drugs SET Name = ?, Size = ?, Type = ?, Kegunaan = ?, Dosis = ?, `Cara Penggunaan` = ?, `Efek Samping` = ?, `Peringatan Penting` = ? WHERE Name = ?',
@@ -426,7 +435,6 @@ app.delete('/api/drugs/by-name/:name', async (req, res) => {
 });
 
 // --- Error Handling Middleware ---
-// Multer error handler
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
@@ -435,23 +443,22 @@ app.use((error, req, res, next) => {
         message: 'Ukuran file terlalu besar. Maksimal 5MB.'
       });
     }
-    // Handle other Multer errors if needed
     return res.status(400).json({
         success: false,
         message: `Kesalahan unggah file: ${error.message}`
     });
-  } else if (error) { // Handle other errors
-    console.error('Unhandled error:', error);
+  } else if (error) { 
+    console.error('Unhandled error caught by middleware:', error);
     return res.status(500).json({
       success: false,
       message: 'Terjadi kesalahan internal server.',
-      error: error.message
+      error: error.message // In production, you might not want to send the raw error message
     });
   }
-  next();
+  next(); // Should not be reached if error is handled
 });
 
-// 404 Not Found Handler (for any unhandled routes)
+// 404 Not Found Handler
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -463,7 +470,7 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`✓ MEDIVIZE Backend server running on port ${PORT}`);
   console.log(`✓ Health check: http://localhost:${PORT}/api/health`);
-  console.log(`✓ Uploaded images served from: http://localhost:${PORT}/uploads/<filename>`);
+  console.log(`✓ Uploaded images served from: http://localhost:${PORT}/uploads/<filename> (if running locally)`);
 });
 
-module.exports = app; // For testing or serverless deployment
+module.exports = app;
