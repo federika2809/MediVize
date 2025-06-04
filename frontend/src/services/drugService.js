@@ -6,17 +6,30 @@ const API_BASE_URL = 'https://medivize-backend.netlify.app/api';
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json', // Default content type for most requests
+    // Default content type for most requests.
+    // This will be overridden for FormData requests by Axios itself,
+    // but we'll explicitly set it for classifyDrugImage for clarity/strictness.
+    'Content-Type': 'application/json', 
   },
 });
 
 export const classifyDrugImage = async (imageFile) => {
   const formData = new FormData();
-  formData.append('image', imageFile);
+  formData.append('image', imageFile); // Ensure the field name is 'image' as required by the backend
+
+  // Log FormData contents for debugging
+  for (let pair of formData.entries()) {
+      console.log(pair[0]+ ', ' + pair[1]); 
+  }
 
   try {
-    // Axios automatically sets 'Content-Type' to 'multipart/form-data' for FormData
-    const response = await api.post('/drugs/classify', formData);
+    // Explicitly set Content-Type for this request.
+    // Axios typically handles this automatically for FormData, but being explicit can help with strict backends.
+    const response = await api.post('/drugs/classify', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', // Crucial for file uploads
+      },
+    });
 
     // Axios wraps the response data in `response.data`
     return { success: true, data: response.data.data };
