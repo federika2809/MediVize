@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Camera, Upload, AlertCircle, CheckCircle, Lightbulb, Search, Image as ImageIcon, Zap, Shield, Clock } from 'lucide-react';
 
 // Import all functions from the updated drugService.js
-import { classifyDrugImage, getDrugByName, searchDrugs, getAllDrugs, testConnection, debugDrugSearch } from './drugService'; 
+import { classifyDrugImage, getDrugByName, searchDrugs, getAllDrugs, testConnection, debugDrugSearch } from '../services/drugService'; 
 
 // IMAGE_BASE_URL is still needed here for displaying images
 const IMAGE_BASE_URL = 'https://medivize-backend.netlify.app'; 
