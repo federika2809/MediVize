@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react'; // Menambahkan useRef
 import { useNavigate } from 'react-router-dom';
 // import CameraInput from '../components/ui/CameraInput'; // Diasumsikan ada
 // import Button from '../components/common/Button'; // Diasumsikan ada
@@ -7,29 +7,71 @@ import { motion } from 'framer-motion';
 import { Camera, Upload, AlertCircle, CheckCircle, Lightbulb, Search, Image as ImageIcon, Zap, Shield, Clock } from 'lucide-react'; // Mengganti nama Image menjadi ImageIcon untuk menghindari konflik
 
 // --- Mock Components (Hapus atau ganti dengan implementasi Anda jika sudah ada) ---
-// Placeholder untuk komponen yang diimpor agar kode bisa berjalan mandiri untuk demonstrasi.
-// Ganti ini dengan impor aktual Anda.
-const CameraInput = ({ onImageSelected }) => (
-    <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-teal-500 transition-colors">
-        <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" /> {/* Menggunakan ImageIcon */}
-        <p className="mb-2 text-gray-600">Seret & lepas gambar, atau klik untuk memilih</p>
-        <input 
-            type="file" 
-            className="hidden" 
-            id="file-upload" 
-            accept="image/*" 
-            onChange={(e) => e.target.files && e.target.files[0] && onImageSelected(e.target.files[0])} 
-        />
-        <label 
-            htmlFor="file-upload" 
-            className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700"
-        >
-            <Upload className="h-4 w-4 mr-2" />
-            Pilih Gambar
-        </label>
-        <p className="text-xs text-gray-500 mt-2">PNG, JPG, GIF hingga 10MB</p>
-    </div>
-);
+const CameraInput = ({ onImageSelected }) => {
+    const fileInputRef = useRef(null);
+    const cameraInputRef = useRef(null);
+
+    const handleFileSelect = (event) => {
+        if (event.target.files && event.target.files[0]) {
+            onImageSelected(event.target.files[0]);
+        }
+    };
+
+    const triggerFileSelect = () => {
+        fileInputRef.current?.click();
+    };
+
+    const triggerCamera = () => {
+        cameraInputRef.current?.click();
+    };
+
+    return (
+        <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-teal-500 transition-colors">
+            <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <p className="mb-4 text-gray-600">Seret & lepas gambar, atau pilih dari galeri/kamera:</p>
+            
+            {/* Input tersembunyi untuk memilih file dari galeri */}
+            <input 
+                type="file" 
+                className="hidden" 
+                id="file-upload-gallery" 
+                accept="image/*" 
+                ref={fileInputRef}
+                onChange={handleFileSelect} 
+            />
+            {/* Input tersembunyi untuk mengambil gambar dengan kamera */}
+            <input 
+                type="file" 
+                className="hidden" 
+                id="file-upload-camera" 
+                accept="image/*" 
+                capture="environment" // atau "user" untuk kamera depan
+                ref={cameraInputRef}
+                onChange={handleFileSelect}
+            />
+
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <Button 
+                    onClick={triggerFileSelect}
+                    variant="secondary" // Anda mungkin perlu menambahkan style untuk variant secondary
+                    className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center justify-center"
+                >
+                    <Upload className="h-5 w-5 mr-2" />
+                    Pilih dari Galeri
+                </Button>
+                <Button 
+                    onClick={triggerCamera}
+                    variant="secondary"
+                    className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center justify-center"
+                >
+                    <Camera className="h-5 w-5 mr-2" />
+                    Ambil dengan Kamera
+                </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">PNG, JPG, WEBP hingga 5MB</p>
+        </div>
+    );
+};
 
 const Button = ({ onClick, disabled, children, variant, className }) => (
     <button
@@ -38,29 +80,53 @@ const Button = ({ onClick, disabled, children, variant, className }) => (
         className={`font-medium py-2 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2
             ${disabled ? 'bg-gray-400 cursor-not-allowed' : ''}
             ${variant === 'primary' && !disabled ? 'bg-teal-600 hover:bg-teal-700 text-white focus:ring-teal-500' : ''}
-            ${variant !== 'primary' && !disabled ? 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500' : ''}
+            ${(variant === 'secondary' || variant !== 'primary') && !disabled ? 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500' : ''}
             ${className}`}
     >
         {children}
     </button>
 );
 
+// Menyesuaikan ClassificationResult untuk mencerminkan data dari backend Express
 const ClassificationResult = ({ result, onViewDetail }) => (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <h3 className="text-xl font-semibold text-gray-800 mb-3">Hasil Prediksi:</h3>
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-2xl font-bold text-green-700">{result.predicted_class || 'Tidak ada nama obat'}</p>
-            <p className="text-sm text-green-600">
-                Keyakinan: {result.confidence !== undefined ? (result.confidence * 100).toFixed(2) + '%' : 'N/A'}
-            </p>
-        </div>
-        {result.authenticated_by && (
-            <p className="text-xs text-gray-500 mb-4">Diautentikasi oleh: {result.authenticated_by}</p>
+        <h3 className="text-xl font-semibold text-gray-800 mb-3">Hasil Deteksi:</h3>
+        {result.imageUrl && (
+            <div className="mb-4">
+                <img 
+                    src={`http://localhost:8080${result.imageUrl}`} // Asumsi backend di localhost:8080
+                    alt="Obat yang dideteksi" 
+                    className="max-w-xs mx-auto rounded-lg shadow-md max-h-60 object-contain"
+                    onError={(e) => { e.target.style.display = 'none'; /* Sembunyikan jika gambar gagal dimuat */ }}
+                />
+            </div>
         )}
-        {result.predicted_class && (
-            <Button onClick={() => onViewDetail(result.predicted_class)} variant="primary" className="w-full">
-                Lihat Detail Obat
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-2xl font-bold text-green-700">{result.drugName || 'Nama obat tidak tersedia'}</p>
+            {result.confidence !== undefined && (
+                 <p className="text-sm text-green-600">
+                    Keyakinan: {(result.confidence * 100).toFixed(2)}%
+                </p>
+            )}
+        </div>
+
+        {/* Menampilkan detail obat jika ada */}
+        {result.drugDetails && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+                <h4 className="text-lg font-semibold text-gray-700 mb-2">Detail Obat:</h4>
+                <p className="text-sm text-gray-600"><strong>Tipe:</strong> {result.drugDetails.type || '-'}</p>
+                <p className="text-sm text-gray-600"><strong>Ukuran:</strong> {result.drugDetails.size || '-'}</p>
+                <p className="text-sm text-gray-600"><strong>Kegunaan:</strong> {result.drugDetails.purpose || '-'}</p>
+            </div>
+        )}
+        
+        {result.drugName && result.drugName !== "Tidak Dikenali" && (
+            <Button onClick={() => onViewDetail(result.drugName)} variant="primary" className="w-full mt-4">
+                Lihat Detail Lengkap Obat
             </Button>
+        )}
+         {result.processedAt && (
+            <p className="text-xs text-gray-400 mt-3 text-center">Diproses pada: {new Date(result.processedAt).toLocaleString()}</p>
         )}
     </div>
 );
@@ -68,30 +134,25 @@ const ClassificationResult = ({ result, onViewDetail }) => (
 
 
 // --- Konfigurasi dan Fungsi API ---
-const API_URL = 'https://federika-my-drug-classifier-api.hf.space/predict'; // URL API Hugging Face Anda
-const USERNAME = 'testuser'; // Ganti jika username Anda berbeda
-const PASSWORD = 'testpass'; // Ganti jika password Anda berbeda
+// Mengarah ke backend Express Anda
+const API_URL = 'http://localhost:8080/api/drugs/classify'; // Sesuaikan jika port backend Anda berbeda
 
 /**
- * Mengirim gambar ke API untuk klasifikasi.
+ * Mengirim gambar ke API backend Express untuk klasifikasi.
  * @param {File} imageFile - File gambar yang akan diklasifikasi.
  * @returns {Promise<object>} - Promise yang resolve dengan hasil klasifikasi atau error.
  */
 async function classifyDrugImage(imageFile) {
     const formData = new FormData();
-    formData.append('file', imageFile);
-
-    // Encode credentials for Basic Auth
-    const basicAuth = 'Basic ' + btoa(USERNAME + ':' + PASSWORD);
+    // Backend Express mengharapkan field 'image'
+    formData.append('image', imageFile); 
 
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Authorization': basicAuth,
-                // 'Accept': 'application/json', // Opsional, server Anda harusnya sudah mengembalikan JSON
-            },
-            body: formData, // Fetch API akan mengatur Content-Type menjadi multipart/form-data secara otomatis
+            // Tidak perlu header Authorization untuk backend ini
+            // Fetch API akan mengatur Content-Type menjadi multipart/form-data secara otomatis
+            body: formData, 
         });
 
         const responseData = await response.json().catch(err => {
@@ -99,22 +160,26 @@ async function classifyDrugImage(imageFile) {
             if (!response.ok) {
                 throw new Error(`Permintaan API gagal dengan status ${response.status} dan respons bukan JSON.`);
             }
-            return {}; 
+            // Jika respons OK tapi bukan JSON (jarang terjadi untuk API yang dirancang dengan baik)
+            return { success: false, message: "Respons API tidak dalam format JSON yang valid." }; 
         });
 
         if (!response.ok) {
-            const errorMessage = responseData.message || responseData.error || `Permintaan API gagal dengan status ${response.status}`;
+            // Backend Express Anda mengirimkan 'message' dalam objek error
+            const errorMessage = responseData.message || `Permintaan API gagal dengan status ${response.status}`;
             console.error('Respons Error API:', { status: response.status, data: responseData, message: errorMessage });
             return { success: false, message: errorMessage };
         }
         
-        return { success: true, data: responseData };
+        // Backend Express Anda mengirimkan data dalam field 'data' jika sukses
+        return { success: true, data: responseData.data }; // Ambil dari responseData.data
 
     } catch (error) {
         console.error('Kesalahan jaringan atau lainnya di classifyDrugImage:', error);
         let errorMessage = 'Terjadi kesalahan jaringan atau koneksi ke server gagal.';
+        // Error CORS akan masuk ke sini juga
         if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
-             errorMessage = 'Gagal menghubungi server API. Periksa koneksi internet Anda, pastikan endpoint API dapat diakses, dan tidak ada masalah CORS.';
+             errorMessage = 'Gagal menghubungi server API. Pastikan server backend berjalan dan konfigurasi CORS sudah benar. Periksa juga koneksi internet Anda.';
         } else if (error.message) {
             errorMessage = `Kesalahan: ${error.message}.`;
         }
@@ -147,27 +212,32 @@ function ClassificationPage() {
         setClassificationResult(null);
 
         try {
-            // Panggil fungsi classifyDrugImage yang sudah didefinisikan di atas
             const result = await classifyDrugImage(selectedImage);
 
             if (result.success && result.data) {
-                // API Anda mengembalikan 'predicted_class'
-                const predictedDrug = result.data.predicted_class;
+                // Backend Express mengembalikan 'drugName' di dalam objek 'data'
+                const predictedDrugName = result.data.drugName;
+                setClassificationResult(result.data); // Simpan seluruh data hasil untuk ditampilkan
 
-                if (predictedDrug) {
-                    navigate(`/drug/${encodeURIComponent(predictedDrug)}`);
+                if (predictedDrugName && predictedDrugName !== "Tidak Dikenali") {
+                    // Navigasi jika obat dikenali
+                    // Anda mungkin ingin menunda navigasi agar pengguna bisa melihat hasilnya dulu
+                    // atau tambahkan tombol "Lihat Detail" di ClassificationResult
+                    // Untuk saat ini, saya akan tetap navigasi langsung jika dikenali
+                    // navigate(`/drug/${encodeURIComponent(predictedDrugName)}`);
+                    console.log("Obat terdeteksi:", predictedDrugName, "Menampilkan hasil di halaman ini.");
                 } else {
-                    // Jika API sukses tapi tidak ada predicted_class (seharusnya tidak terjadi dengan API Anda)
-                    console.warn("API sukses, tapi 'predicted_class' hilang atau kosong. Menampilkan data mentah:", result.data);
-                    setClassificationResult(result.data); 
-                    // Anda mungkin ingin menampilkan pesan error yang lebih spesifik di sini
-                    setError("Hasil klasifikasi diterima, tetapi nama obat tidak ditemukan dalam respons.");
+                    // Jika API sukses tapi drugName adalah "Tidak Dikenali" atau kosong
+                    console.warn("API sukses, tapi obat tidak dikenali. Menampilkan data mentah:", result.data);
+                    setError("Obat tidak dapat dikenali dari gambar yang diberikan.");
                 }
             } else {
+                // Jika result.success adalah false
                 setError(result.message || 'Terjadi kesalahan saat klasifikasi gambar.');
                 setClassificationResult(null);
             }
         } catch (err) {
+            // Catch untuk error yang tidak terduga selama proses di handleClassify
             setError(
                 'Terjadi kesalahan tak terduga saat memproses permintaan. Silakan coba lagi.'
             );
@@ -179,11 +249,11 @@ function ClassificationPage() {
     };
 
     const handleViewDetail = (drugName) => {
-        if (drugName) {
+        if (drugName && drugName !== "Tidak Dikenali") {
             navigate(`/drug/${encodeURIComponent(drugName)}`);
         } else {
-            console.warn('Nama obat tidak tersedia untuk detail.');
-            setError('Tidak dapat menampilkan detail, nama obat tidak ditemukan.');
+            console.warn('Nama obat tidak valid untuk detail:', drugName);
+            setError('Tidak dapat menampilkan detail, nama obat tidak valid atau tidak dikenali.');
         }
     };
 
@@ -234,10 +304,9 @@ function ClassificationPage() {
                         transition={{ duration: 0.6, delay: 0.6 }}
                         className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed"
                     >
-                        Teknologi AI untuk mengidentifikasi obat dengan akurat dan dapatkan informasi lengkap tentang dosis, efek samping, dan petunjuk penggunaan.
+                        Unggah gambar kemasan obat untuk identifikasi cepat menggunakan AI dan dapatkan informasi detailnya.
                     </motion.p>
                 </div>
-
                 
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
@@ -409,8 +478,8 @@ function ClassificationPage() {
                         </div>
                     </motion.div>
                 )}
-
                 
+                {/* Menampilkan hasil jika ada, tidak loading, dan tidak ada error yang lebih prioritas */}
                 {classificationResult && !loading && !error && (
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -420,56 +489,41 @@ function ClassificationPage() {
                     >
                         <div className="text-center mb-8">
                             <h2 className="text-3xl font-bold text-gray-800 mb-3">
-                                Hasil Deteksi Berhasil
+                                {classificationResult.drugName && classificationResult.drugName !== "Tidak Dikenali" ? "Hasil Deteksi Berhasil" : "Obat Tidak Dikenali"}
                             </h2>
-                            <p className="text-gray-600">Berikut adalah informasi obat yang terdeteksi</p>
+                            <p className="text-gray-600">
+                                {classificationResult.drugName && classificationResult.drugName !== "Tidak Dikenali" 
+                                    ? "Berikut adalah informasi obat yang terdeteksi:" 
+                                    : "Sistem tidak dapat mengenali obat dari gambar ini. Silakan coba lagi dengan gambar yang lebih jelas."}
+                            </p>
                         </div>
                         
                         <div className="max-w-3xl mx-auto">
                             <ClassificationResult
-                                result={classificationResult}
+                                result={classificationResult} // Mengirim seluruh objek data dari API
                                 onViewDetail={handleViewDetail}
                             />
                         </div>
                     </motion.div>
                 )}
                 
-                {/* State "Obat Belum Terdeteksi" jika API sukses tapi tidak ada predicted_class */}
-                {classificationResult && !classificationResult.predicted_class && !loading && !error && (
+                {/* State "Obat Tidak Dikenali" secara spesifik jika drugName adalah "Tidak Dikenali" dan tidak ada error lain */}
+                {/* Ini sudah ditangani oleh blok di atas, jadi bagian ini bisa dihapus atau disesuaikan jika ingin perlakuan berbeda */}
+                {/*
+                {classificationResult && classificationResult.drugName === "Tidak Dikenali" && !loading && !error && (
                      <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mt-12 max-w-3xl mx-auto"
                     >
-                        <div className="bg-white rounded-2xl p-10 text-center shadow-lg border border-gray-200">
-                            <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                                <Search className="h-8 w-8 text-white" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-800 mb-4">Obat Belum Terdeteksi</h3>
-                            <p className="text-gray-600 mb-6 leading-relaxed">
-                                Sistem belum dapat mengenali obat dari gambar yang diberikan, meskipun API merespons. 
-                                Silakan coba lagi dengan gambar yang lebih jelas atau berbeda.
-                            </p>
-                             <Button 
-                                onClick={() => {
-                                    setSelectedImage(null);
-                                    setError('');
-                                    setClassificationResult(null);
-                                }}
-                                variant="primary"
-                                className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 px-8 py-3 font-semibold rounded-xl shadow-md text-white"
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <Camera className="h-4 w-4" />
-                                    <span>Ambil Foto Ulang</span>
-                                </div>
-                            </Button>
-                        </div>
+                       // ... Konten untuk "Tidak Dikenali" ...
                     </motion.div>
                 )}
+                */}
 
                 {/* State "Simplified Not Found State" dari kode asli, diaktifkan oleh pesan error spesifik */}
-                 {error && error.toLowerCase().includes('tidak ditemukan') && !loading && !classificationResult && (
+                {/* Ini akan ditampilkan jika ada error dari API yang mengandung "tidak ditemukan" */}
+                 {error && error.toLowerCase().includes('tidak ditemukan') && !loading && (
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -526,8 +580,6 @@ function ClassificationPage() {
                         </div>
                     </motion.div>
                 )}
-
-
             </motion.div>
         </div>
     );
