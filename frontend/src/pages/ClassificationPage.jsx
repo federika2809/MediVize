@@ -2,9 +2,66 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; // Assuming you use react-router
 import { motion } from 'framer-motion';
 import { Camera, Upload, AlertCircle, CheckCircle, Lightbulb, Search, Image as ImageIcon, Zap, Shield, Clock } from 'lucide-react';
-import { classifyDrugImage } from './services/drugService'; // Import from your service file
 
-// --- Mock Components (as provided by you, ensure they are styled or replace with actual UI library components) ---
+// --- Service Functions (Integrated from drugService.js) ---
+const API_BASE_URL = 'https://medivize-backend.netlify.app/api'; 
+const IMAGE_BASE_URL = 'https://medivize-backend.netlify.app'; // For constructing image URLs
+
+/**
+ * Sends image to the backend for classification.
+ * This function is now part of ClassificationPage.js
+ * @param {File} imageFile - The image file to classify.
+ * @returns {Promise<object>} - Promise resolving with classification result or error.
+ */
+const classifyDrugImageService = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('image', imageFile); // Field name 'image' must match Express 'upload.single('image')'
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/drugs/classify`, {
+      method: 'POST',
+      body: formData,
+      // Headers like 'Content-Type: multipart/form-data' are set automatically by fetch for FormData
+    });
+
+    // Try to parse JSON regardless of response.ok, as backend might send error details in JSON
+    let responseData;
+    try {
+        responseData = await response.json();
+    } catch (jsonError) {
+        console.error("Failed to parse API response as JSON:", jsonError);
+        // If JSON parsing fails and response is not ok, throw a more generic error
+        if (!response.ok) {
+            throw new Error(`Permintaan API gagal dengan status ${response.status} dan respons bukan JSON.`);
+        }
+        // If response is ok but not JSON (unlikely for this API), treat as error
+        return { success: false, message: "Respons API tidak dalam format JSON yang valid meskipun status OK." };
+    }
+
+    if (!response.ok) {
+      const errorMessage = responseData.message || `Permintaan API gagal dengan status ${response.status}`;
+      console.error('API Error Response:', { status: response.status, data: responseData, message: errorMessage });
+      return { success: false, message: errorMessage, errorData: responseData };
+    }
+    
+    // Backend sends data in responseData.data upon success
+    return { success: true, data: responseData.data };
+
+  } catch (error) {
+    console.error('Kesalahan jaringan atau lainnya di classifyDrugImageService:', error);
+    let errorMessage = 'Terjadi kesalahan jaringan atau koneksi ke server gagal.';
+    if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
+         errorMessage = 'Gagal menghubungi server API. Pastikan server backend (Express) berjalan dan konfigurasi CORS sudah benar. Periksa juga koneksi internet Anda.';
+    } else if (error.message) {
+         errorMessage = `Kesalahan: ${error.message}.`;
+    }
+    return { success: false, message: errorMessage, error: error };
+  }
+};
+// --- End of Service Functions ---
+
+
+// --- UI Components (as provided by you) ---
 const CameraInput = ({ onImageSelected }) => {
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
@@ -77,16 +134,11 @@ const Button = ({ onClick, disabled, children, variant, className }) => (
             ${disabled ? 'bg-gray-400 cursor-not-allowed' : ''}
             ${variant === 'primary' && !disabled ? 'bg-teal-600 hover:bg-teal-700 text-white focus:ring-teal-500' : ''}
             ${(variant === 'secondary' || variant !== 'primary') && !disabled ? 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500' : ''}
-            ${className}`} // Allows overriding/extending styles
+            ${className}`}
     >
         {children}
     </button>
 );
-
-// Base URL for images, derived from your service's API_BASE_URL
-// drugService.js uses 'https://medivize-backend.netlify.app/api'
-// Images are served from '/uploads' relative to the domain.
-const IMAGE_BASE_URL = 'https://medivize-backend.netlify.app';
 
 const ClassificationResult = ({ result, onViewDetail }) => (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
@@ -94,11 +146,11 @@ const ClassificationResult = ({ result, onViewDetail }) => (
         {result.imageUrl && (
             <div className="mb-4">
                 <img 
-                    src={`${IMAGE_BASE_URL}${result.imageUrl}`} // Use the production base URL for images
+                    src={`${IMAGE_BASE_URL}${result.imageUrl}`} // Uses the integrated IMAGE_BASE_URL
                     alt="Obat yang dideteksi" 
                     className="max-w-xs mx-auto rounded-lg shadow-md max-h-60 object-contain"
                     onError={(e) => { 
-                        e.target.onerror = null; // Prevent infinite loop if placeholder also fails
+                        e.target.onerror = null; 
                         e.target.src = 'https://placehold.co/300x200/cccccc/ffffff?text=Gagal+Muat+Gambar';
                         e.target.alt = 'Gagal memuat gambar obat';
                      }}
@@ -121,7 +173,6 @@ const ClassificationResult = ({ result, onViewDetail }) => (
                 <p className="text-sm text-gray-600"><strong>Tipe:</strong> {result.drugDetails.type || '-'}</p>
                 <p className="text-sm text-gray-600"><strong>Ukuran:</strong> {result.drugDetails.size || '-'}</p>
                 <p className="text-sm text-gray-600"><strong>Kegunaan:</strong> {result.drugDetails.purpose || '-'}</p>
-                {/* Add more details if available and needed */}
             </div>
         )}
         
@@ -135,7 +186,7 @@ const ClassificationResult = ({ result, onViewDetail }) => (
         )}
     </div>
 );
-// --- End Mock Components ---
+// --- End UI Components ---
 
 // --- Main Classification Page Component ---
 function ClassificationPage() {
@@ -162,8 +213,8 @@ function ClassificationPage() {
         setClassificationResult(null);
 
         try {
-            // Use the imported classifyDrugImage function from drugService.js
-            const result = await classifyDrugImage(selectedImage);
+            // Use the integrated classifyDrugImageService function
+            const result = await classifyDrugImageService(selectedImage);
 
             if (result.success && result.data) {
                 setClassificationResult(result.data); 
@@ -172,14 +223,13 @@ function ClassificationPage() {
                     console.log("Obat terdeteksi:", result.data.drugName, "Menampilkan hasil di halaman ini.");
                 } else {
                     console.warn("API sukses, tapi obat tidak dikenali. Data:", result.data);
-                    // The ClassificationResult component will handle the "Tidak Dikenali" message
                 }
             } else {
                 setError(result.message || 'Terjadi kesalahan saat klasifikasi gambar.');
                 console.error("Classification failed or API returned error:", result);
                 setClassificationResult(null);
             }
-        } catch (err) { // This catch is for unexpected errors in the try block itself, not API errors handled by classifyDrugImage
+        } catch (err) { 
             setError('Terjadi kesalahan tak terduga saat memproses permintaan. Silakan coba lagi.');
             console.error('Unexpected error in handleClassify:', err);
             setClassificationResult(null);
@@ -190,7 +240,7 @@ function ClassificationPage() {
 
     const handleViewDetail = (drugName) => {
         if (drugName && drugName !== "Tidak Dikenali") {
-            navigate(`/drug/${encodeURIComponent(drugName)}`); // Ensure you have a route like /drug/:drugName
+            navigate(`/drug/${encodeURIComponent(drugName)}`);
         } else {
             console.warn('Invalid drug name for detail view:', drugName);
             setError('Tidak dapat menampilkan detail, nama obat tidak valid atau tidak dikenali.');
@@ -206,7 +256,6 @@ function ClassificationPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 relative overflow-hidden">
-            {/* Decorative background elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 right-10 w-32 h-32 bg-teal-100/30 rounded-full blur-2xl"></div>
                 <div className="absolute bottom-20 left-10 w-32 h-32 bg-cyan-100/30 rounded-full blur-2xl"></div>
@@ -218,7 +267,6 @@ function ClassificationPage() {
                 transition={{ duration: 0.5 }}
                 className="classification-page container relative z-10 py-12 mx-auto px-4 sm:px-6 lg:px-8"
             >
-                {/* Header Section */}
                 <div className="text-center mb-12">
                     <motion.div
                         initial={{ scale: 0, rotate: -180 }}
@@ -246,7 +294,6 @@ function ClassificationPage() {
                     </motion.p>
                 </div>
                 
-                {/* Tips Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -284,7 +331,6 @@ function ClassificationPage() {
                     </div>
                 </motion.div>
 
-                {/* Main Interaction Area: Upload and Classify Button */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 30 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -384,7 +430,6 @@ function ClassificationPage() {
                     </div>
                 </motion.div>
                 
-                {/* Loading Indicator Section */}
                 {loading && (
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -402,15 +447,14 @@ function ClassificationPage() {
                                     className="bg-gradient-to-r from-teal-500 to-cyan-600 h-2 rounded-full"
                                     initial={{ width: "0%" }}
                                     animate={{ width: "100%" }}
-                                    transition={{ duration: 1.5, ease: "linear", repeat: Infinity, repeatType: "loop" }} // Faster loop for loading
+                                    transition={{ duration: 1.5, ease: "linear", repeat: Infinity, repeatType: "loop" }}
                                 />
                             </div>
                         </div>
                     </motion.div>
                 )}
                 
-                {/* Classification Result Section */}
-                {classificationResult && !loading && ( /* Show if result exists and not loading, error is handled above or implicitly by result content */
+                {classificationResult && !loading && (
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -436,7 +480,6 @@ function ClassificationPage() {
                     </motion.div>
                 )}
 
-                {/* "Not Found" specific state if error message indicates it */}
                  {error && error.toLowerCase().includes('tidak ditemukan') && !loading && !classificationResult && (
                      <motion.div
                          initial={{ opacity: 0, y: 30 }}
@@ -479,7 +522,7 @@ function ClassificationPage() {
                                          setError('');
                                          setClassificationResult(null);
                                      }}
-                                     variant="primary" // Ensure this variant is styled for primary actions
+                                     variant="primary"
                                      className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 px-8 py-3 font-semibold rounded-xl shadow-md text-white"
                                  >
                                      <div className="flex items-center space-x-2">
