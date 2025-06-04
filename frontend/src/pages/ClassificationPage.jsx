@@ -3,63 +3,11 @@ import { useNavigate } from 'react-router-dom'; // Assuming you use react-router
 import { motion } from 'framer-motion';
 import { Camera, Upload, AlertCircle, CheckCircle, Lightbulb, Search, Image as ImageIcon, Zap, Shield, Clock } from 'lucide-react';
 
-// --- Service Functions (Integrated from drugService.js) ---
-const API_BASE_URL = 'https://medivize-backend.netlify.app/api'; 
-const IMAGE_BASE_URL = 'https://medivize-backend.netlify.app'; // For constructing image URLs
+// Import all functions from the updated drugService.js
+import { classifyDrugImage, getDrugByName, searchDrugs, getAllDrugs, testConnection, debugDrugSearch } from './drugService'; 
 
-/**
- * Sends image to the backend for classification.
- * This function is now part of ClassificationPage.js
- * @param {File} imageFile - The image file to classify.
- * @returns {Promise<object>} - Promise resolving with classification result or error.
- */
-const classifyDrugImageService = async (imageFile) => {
-  const formData = new FormData();
-  formData.append('image', imageFile); // Field name 'image' must match Express 'upload.single('image')'
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/drugs/classify`, {
-      method: 'POST',
-      body: formData,
-      // Headers like 'Content-Type: multipart/form-data' are set automatically by fetch for FormData
-    });
-
-    // Try to parse JSON regardless of response.ok, as backend might send error details in JSON
-    let responseData;
-    try {
-        responseData = await response.json();
-    } catch (jsonError) {
-        console.error("Failed to parse API response as JSON:", jsonError);
-        // If JSON parsing fails and response is not ok, throw a more generic error
-        if (!response.ok) {
-            throw new Error(`Permintaan API gagal dengan status ${response.status} dan respons bukan JSON.`);
-        }
-        // If response is ok but not JSON (unlikely for this API), treat as error
-        return { success: false, message: "Respons API tidak dalam format JSON yang valid meskipun status OK." };
-    }
-
-    if (!response.ok) {
-      const errorMessage = responseData.message || `Permintaan API gagal dengan status ${response.status}`;
-      console.error('API Error Response:', { status: response.status, data: responseData, message: errorMessage });
-      return { success: false, message: errorMessage, errorData: responseData };
-    }
-    
-    // Backend sends data in responseData.data upon success
-    return { success: true, data: responseData.data };
-
-  } catch (error) {
-    console.error('Kesalahan jaringan atau lainnya di classifyDrugImageService:', error);
-    let errorMessage = 'Terjadi kesalahan jaringan atau koneksi ke server gagal.';
-    if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
-         errorMessage = 'Gagal menghubungi server API. Pastikan server backend (Express) berjalan dan konfigurasi CORS sudah benar. Periksa juga koneksi internet Anda.';
-    } else if (error.message) {
-         errorMessage = `Kesalahan: ${error.message}.`;
-    }
-    return { success: false, message: errorMessage, error: error };
-  }
-};
-// --- End of Service Functions ---
-
+// IMAGE_BASE_URL is still needed here for displaying images
+const IMAGE_BASE_URL = 'https://medivize-backend.netlify.app'; 
 
 // --- UI Components (as provided by you) ---
 const CameraInput = ({ onImageSelected }) => {
@@ -153,16 +101,16 @@ const ClassificationResult = ({ result, onViewDetail }) => (
                         e.target.onerror = null; 
                         e.target.src = 'https://placehold.co/300x200/cccccc/ffffff?text=Gagal+Muat+Gambar';
                         e.target.alt = 'Gagal memuat gambar obat';
-                     }}
+                   }}
                 />
             </div>
         )}
         <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-2xl font-bold text-green-700">{result.drugName || 'Nama obat tidak tersedia'}</p>
             {result.confidence !== undefined && (
-                 <p className="text-sm text-green-600">
-                     Keyakinan: {(result.confidence * 100).toFixed(2)}%
-                 </p>
+                    <p className="text-sm text-green-600">
+                        Keyakinan: {(result.confidence * 100).toFixed(2)}%
+                    </p>
             )}
         </div>
 
@@ -181,7 +129,7 @@ const ClassificationResult = ({ result, onViewDetail }) => (
                 Lihat Detail Lengkap Obat
             </Button>
         )}
-         {result.processedAt && (
+          {result.processedAt && (
             <p className="text-xs text-gray-400 mt-3 text-center">Diproses pada: {new Date(result.processedAt).toLocaleString()}</p>
         )}
     </div>
@@ -213,8 +161,8 @@ function ClassificationPage() {
         setClassificationResult(null);
 
         try {
-            // Use the integrated classifyDrugImageService function
-            const result = await classifyDrugImageService(selectedImage);
+            // Use the imported classifyDrugImage function from drugService.js
+            const result = await classifyDrugImage(selectedImage);
 
             if (result.success && result.data) {
                 setClassificationResult(result.data); 
@@ -480,60 +428,60 @@ function ClassificationPage() {
                     </motion.div>
                 )}
 
-                 {error && error.toLowerCase().includes('tidak ditemukan') && !loading && !classificationResult && (
-                     <motion.div
-                         initial={{ opacity: 0, y: 30 }}
-                         animate={{ opacity: 1, y: 0 }}
-                         className="mt-12 max-w-3xl mx-auto"
-                     >
-                         <div className="bg-white rounded-2xl p-10 text-center shadow-lg border border-gray-200">
-                             <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                                 <Search className="h-8 w-8 text-white" />
-                             </div>
-                             <h3 className="text-2xl font-bold text-gray-800 mb-4">Obat Tidak Ditemukan</h3>
-                             <p className="text-gray-600 mb-6 leading-relaxed">
-                                 Sistem tidak dapat menemukan atau mengenali obat dari gambar yang diberikan. 
-                                 Pesan dari sistem: "{error}" <br/>
-                                 Mari coba lagi dengan foto yang lebih optimal.
-                             </p>
-                             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6 text-left">
-                                 <h4 className="font-bold text-blue-800 mb-3 flex items-center">
-                                     <Lightbulb className="h-4 w-4 mr-2" />
-                                     Tips untuk Foto yang Lebih Baik
-                                 </h4>
-                                 <div className="grid md:grid-cols-2 gap-3">
-                                     {[
-                                         "Pastikan pencahayaan cukup terang dan merata",
-                                         "Kemasan obat harus terlihat penuh dalam frame",
-                                         "Hindari bayangan atau pantulan cahaya",
-                                         "Pastikan fokus kamera tajam dan tidak buram"
-                                     ].map(tipText => (
-                                         <div className="flex items-start space-x-2" key={tipText}>
-                                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                             <span className="text-blue-700 text-sm">{tipText}</span>
-                                         </div>
-                                     ))}
-                                 </div>
-                             </div>
-                             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                 <Button 
-                                     onClick={() => {
-                                         setSelectedImage(null);
-                                         setError('');
-                                         setClassificationResult(null);
-                                     }}
-                                     variant="primary"
-                                     className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 px-8 py-3 font-semibold rounded-xl shadow-md text-white"
-                                 >
-                                     <div className="flex items-center space-x-2">
-                                         <Camera className="h-4 w-4" />
-                                         <span>Ambil Foto Ulang</span>
-                                     </div>
-                                 </Button>
-                             </motion.div>
-                         </div>
-                     </motion.div>
-                 )}
+                  {error && error.toLowerCase().includes('tidak ditemukan') && !loading && !classificationResult && (
+                      <motion.div
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-12 max-w-3xl mx-auto"
+                      >
+                          <div className="bg-white rounded-2xl p-10 text-center shadow-lg border border-gray-200">
+                              <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                                  <Search className="h-8 w-8 text-white" />
+                              </div>
+                              <h3 className="text-2xl font-bold text-gray-800 mb-4">Obat Tidak Ditemukan</h3>
+                              <p className="text-gray-600 mb-6 leading-relaxed">
+                                  Sistem tidak dapat menemukan atau mengenali obat dari gambar yang diberikan. 
+                                  Pesan dari sistem: "{error}" <br/>
+                                  Mari coba lagi dengan foto yang lebih optimal.
+                              </p>
+                              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6 text-left">
+                                  <h4 className="font-bold text-blue-800 mb-3 flex items-center">
+                                      <Lightbulb className="h-4 w-4 mr-2" />
+                                      Tips untuk Foto yang Lebih Baik
+                                  </h4>
+                                  <div className="grid md:grid-cols-2 gap-3">
+                                      {[
+                                          "Pastikan pencahayaan cukup terang dan merata",
+                                          "Kemasan obat harus terlihat penuh dalam frame",
+                                          "Hindari bayangan atau pantulan cahaya",
+                                          "Pastikan fokus kamera tajam dan tidak buram"
+                                      ].map(tipText => (
+                                          <div className="flex items-start space-x-2" key={tipText}>
+                                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                              <span className="text-blue-700 text-sm">{tipText}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+                              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                  <Button 
+                                      onClick={() => {
+                                          setSelectedImage(null);
+                                          setError('');
+                                          setClassificationResult(null);
+                                      }}
+                                      variant="primary"
+                                      className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 px-8 py-3 font-semibold rounded-xl shadow-md text-white"
+                                  >
+                                      <div className="flex items-center space-x-2">
+                                          <Camera className="h-4 w-4" />
+                                          <span>Ambil Foto Ulang</span>
+                                      </div>
+                                  </Button>
+                              </motion.div>
+                          </div>
+                      </motion.div>
+                  )}
             </motion.div>
         </div>
     );
