@@ -29,6 +29,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve uploaded files statically
+// NOTE: This static serving will only work if running locally.
+// In Netlify Functions, files uploaded to /tmp are ephemeral and not directly served.
+// If you need to serve uploaded images, consider uploading them to a cloud storage service (e.g., AWS S3, Cloudinary).
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- Database Connection Pool ---
@@ -59,7 +62,8 @@ pool.getConnection()
 // --- Multer Storage Configuration for File Uploads ---
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, 'uploads');
+    // IMPORTANT FIX: Use /tmp for writable storage in serverless environments
+    const uploadDir = '/tmp/uploads'; 
     try {
       await fs.access(uploadDir);
     } catch {
@@ -208,7 +212,11 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
   }
 
   const imagePath = req.file.path;
-  const imageUrl = `/uploads/${req.file.filename}`; // URL relative to this backend
+  // NOTE: The imageUrl generated here will point to a temporary file in /tmp.
+  // This URL will NOT be publicly accessible from the frontend.
+  // If you need to display the uploaded image, you'll need to upload it to a persistent storage service
+  // (e.g., AWS S3, Cloudinary) and return its public URL.
+  const imageUrl = `/uploads/${req.file.filename}`; 
 
   // ML API Configuration
   // Updated to use your Flask ML API endpoint
@@ -303,6 +311,11 @@ app.post('/api/drugs/classify', upload.single('image'), async (req, res) => {
       message: 'Gagal memproses gambar secara keseluruhan.',
       error: error.message
     });
+  } finally {
+    // Ensure the temporary file is deleted after processing, regardless of success or failure
+    if (imagePath) {
+      await fs.unlink(imagePath).catch(e => console.error("Error deleting temporary file in finally block:", e.message));
+    }
   }
 });
 
