@@ -21,7 +21,7 @@ app.use(cors({
     'http://localhost:3010', // Another common React dev port
     'http://localhost:8080', // The backend itself
     'https://medivize.netlify.app', // Frontend production URL
-    // 'https://federika-my-drug-classifier-api.hf.space', // ML API URL - not needed here if Express calls it server-side
+    'https://federika-my-drug-classifier-api.hf.space', // ML API URL - not needed here if Express calls it server-side
   ],
   credentials: true
 }));
