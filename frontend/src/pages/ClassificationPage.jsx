@@ -351,4 +351,49 @@ function ClassificationPage() {
                                 <h4 className="font-bold text-blue-800 mb-3 flex items-center">
                                     <Lightbulb className="h-4 w-4 mr-2" />
                                     Tips untuk Foto yang Lebih Baik
-                               
+                                </h4>
+                                <div className="grid md:grid-cols-2 gap-3">
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span className="text-blue-700 text-sm">Pastikan pencahayaan cukup terang dan merata</span>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span className="text-blue-700 text-sm">Kemasan obat harus terlihat penuh dalam frame</span>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span className="text-blue-700 text-sm">Hindari bayangan atau pantulan cahaya</span>
+                                    </div>
+                                    <div className="flex items-start space-x-2">
+                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                        <span className="text-blue-700 text-sm">Pastikan fokus kamera tajam dan tidak buram</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                <Button 
+                                    onClick={() => {
+                                        setSelectedImage(null);
+                                        setError('');
+                                        setClassificationResult(null);
+                                    }}
+                                    variant="primary"
+                                    className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 px-8 py-3 font-semibold rounded-xl shadow-md text-white"
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <Camera className="h-4 w-4" />
+                                        <span>Ambil Foto Ulang</span>
+                                    </div>
+                                </Button>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                )}
+            </motion.div>
+        </div>
+    );
+}
+
+export default ClassificationPage;
