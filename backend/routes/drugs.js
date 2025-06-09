@@ -1,9 +1,7 @@
-// backend/routes/drugs.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db'); // koneksi ke MySQL
+const db = require('../db');
 
-// Format drug data helper function
 const formatDrugData = (drugRow) => {
   return {
     name: drugRow.Name || '',
@@ -17,7 +15,6 @@ const formatDrugData = (drugRow) => {
   };
 };
 
-// Get drug by ID (if using numeric ID)
 router.get('/drugs/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -44,7 +41,6 @@ router.get('/drugs/:id', async (req, res) => {
   }
 });
 
-// Get drug by name (this should match your URL pattern /drug/Acetin)
 router.get('/drugs/by-name/:name', async (req, res) => {
   try {
     const { name } = req.params;
@@ -52,7 +48,6 @@ router.get('/drugs/by-name/:name', async (req, res) => {
     
     console.log('Searching for drug:', decodedName); // Debug log
     
-    // Try exact match first, then partial match
     const [rows] = await db.execute(
       'SELECT * FROM drugs WHERE Name = ? OR Name LIKE ? LIMIT 1',
       [decodedName, `%${decodedName}%`]
@@ -83,7 +78,6 @@ router.get('/drugs/by-name/:name', async (req, res) => {
   }
 });
 
-// Search drugs
 router.get('/drugs/search', async (req, res) => {
   try {
     const { q } = req.query;
@@ -119,7 +113,6 @@ router.get('/drugs/search', async (req, res) => {
   }
 });
 
-// Get all drugs
 router.get('/drugs', async (req, res) => {
   try {
     const [rows] = await db.execute('SELECT * FROM drugs ORDER BY Name ASC');
