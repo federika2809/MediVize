@@ -39,13 +39,13 @@ function AboutPage() {
   };
 
   return (
-    <div class="min-h-screen bg-white/0 py-12 px-4">
+    <div className="min-h-screen bg-white/0 py-12 px-4">
       <div className="max-w-4xl mx-auto">
 
        
         <div className="text-center mb-16">
           <div className="inline-block mb-6">
-            <div className="bg-gradient-to-r from-teal-500 to-cyan-600 p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-cyan-500 p-4 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-300">
               <Pill className="w-12 h-12 text-white" />
             </div>
           </div>
@@ -60,7 +60,7 @@ function AboutPage() {
         <div className="relative mb-12">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-600 p-3 rounded-lg mr-4">
+              <div className="bg-cyan-500 p-3 rounded-lg mr-4">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-black">
@@ -71,7 +71,7 @@ function AboutPage() {
               <p className="text-gray-700 leading-relaxed mb-6 text-lg">
                 MediVize adalah aplikasi berbasis kecerdasan buatan (AI) yang dirancang untuk membantu masyarakat dalam mengenali dan memahami obat melalui foto kemasan. Proyek ini mengatasi masalah kesalahan penggunaan obat akibat kemasan yang mirip dan kurangnya akses cepat ke informasi obat yang akurat.
               </p>
-              <div className="bg-gray-50 p-6 rounded-xl border-l-4 border-teal-400 hover:border-teal-500 transition-colors duration-300">
+              <div className="bg-gray-50 p-6 rounded-xl border-l-4 border-cyan-400 hover:border-cyan-500 transition-colors duration-300">
                 <p className="text-gray-700 leading-relaxed text-lg font-medium">
                   <strong>Tujuan utama MediVize adalah mencegah kesalahan medikasi dengan menyediakan identifikasi obat yang akurat dan instan, memberikan akses mudah ke informasi obat terpercaya, serta memberdayakan masyarakat untuk menggunakan obat dengan tepat dan aman.</strong>
                 </p>
@@ -84,7 +84,7 @@ function AboutPage() {
         <div className="relative mb-12">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-cyan-500 to-teal-600 p-3 rounded-lg mr-4">
+              <div className="bg-cyan-500 p-3 rounded-lg mr-4">
                 <Users className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-black">
@@ -100,7 +100,7 @@ function AboutPage() {
         <div className="relative">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
             <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-600 p-3 rounded-lg mr-4">
+              <div className="bg-cyan-500 p-3 rounded-lg mr-4">
                 <AlertCircle className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-black">
@@ -110,7 +110,7 @@ function AboutPage() {
             <div className="space-y-4">
               {[
                 "Pengenalan obat hanya melalui foto kemasan, tidak mencakup bentuk fisik pil/tablet.",
-                "Jumlah obat yang dapat dikenali terbatas pada sekitar 143 jenis dari obat yang tersedia.",
+                "Jumlah obat yang dapat dikenali terbatas pada sekitar 150 jenis dari obat yang tersedia.",
                 "Sistem ini tidak menggantikan konsultasi dengan dokter atau apoteker, melainkan hanya sebagai alat bantu.",
                 "Tidak mencakup validasi keaslian obat secara kimiawi.",
                 "Tidak terintegrasi dengan rekam medis elektronik atau sistem farmasi nasional.",
@@ -120,12 +120,12 @@ function AboutPage() {
                   key={index}
                   className="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors duration-300"
                 >
-                  <div className="w-2 h-2 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full mt-3 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-cyan-400 rounded-full mt-3 flex-shrink-0"></div>
                   <p className="text-gray-700 text-lg leading-relaxed">{limitation}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-8 text-teal-700 font-medium text-lg text-center">
+            <p className="mt-8 text-cyan-700 font-medium text-lg text-center">
               <strong>✨ Kami berkomitmen penuh untuk terus berinovasi dan mengembangkan MediVize dengan teknologi terdepan agar dapat mengenali lebih banyak jenis obat dengan akurasi yang semakin tinggi di masa mendatang.</strong>
             </p>
           </div>

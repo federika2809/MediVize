@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Home, Filter, Search, BookOpen, Info } from 'lucide-react';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,16 +13,16 @@ function Header() {
   };
 
   const navItems = [
-    { href: '/', label: 'Beranda' },
-    { href: '/classify', label: 'Klasifikasi' },
-    { href: '/search', label: 'Cari Obat' },
-    { href: '/guide', label: 'Panduan' },
-    { href: '/about', label: 'Tentang' },
+    { href: '/', label: 'Beranda', icon: Home },
+    { href: '/classify', label: 'Klasifikasi', icon: Filter },
+    { href: '/search', label: 'Cari Obat', icon: Search },
+    { href: '/guide', label: 'Panduan', icon: BookOpen },
+    { href: '/about', label: 'Tentang', icon: Info },
   ];
 
   return (
-    <header className="bg-gradient-to-r from-cyan-400 via-teal-500 to-blue-600 text-white shadow-lg relative">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-cyan-600 text-white shadow-lg relative z-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <a
@@ -30,14 +30,12 @@ function Header() {
             className="text-xl sm:text-2xl font-bold flex items-center space-x-2 hover:scale-105 transition-transform duration-200"
             onClick={closeMenu}
           >
-            
             <img
               src="/icon/medicine-192x192.png"
               alt="MediVize Logo"
               className="h-5 w-5 sm:h-6 sm:w-6"
             />
-            {/* </div> */}
-            <span className="bg-gradient-to-r from-white to-cyan-100 bg-clip-text text-transparent">
+            <span className="text-white">
               MediVize
             </span>
           </a>
@@ -49,9 +47,10 @@ function Header() {
                 <li key={item.href}>
                   <a
                     href={item.href}
-                    className="relative px-3 py-2 hover:text-cyan-200 transition-all duration-300 group font-medium"
+                    className="relative px-3 py-2 hover:text-cyan-200 transition-all duration-300 group font-medium flex items-center space-x-2"
                   >
-                    {item.label}
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-cyan-200 transition-all duration-300 group-hover:w-full"></span>
                   </a>
                 </li>
@@ -92,7 +91,7 @@ function Header() {
                     }}
                   >
                     <span className="flex items-center space-x-3">
-                      <span className="w-2 h-2 bg-cyan-200 rounded-full opacity-60"></span>
+                      <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
                     </span>
                   </a>
@@ -103,19 +102,19 @@ function Header() {
         </div>
       </div>
 
-      {/* Mobile Overlay */}
+      {/* Mobile Overlay - Fixed positioning and z-index */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[-1] md:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
           onClick={closeMenu}
         ></div>
       )}
 
-      {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
-        <div className="absolute -bottom-5 -left-5 w-24 h-24 bg-white/5 rounded-full blur-lg"></div>
-        <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/5 rounded-full blur-md"></div>
+      {/* Decorative Elements - Limited to header area only */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-2 right-8 w-16 h-16 bg-white/5 rounded-full blur-lg"></div>
+        <div className="absolute bottom-2 left-8 w-12 h-12 bg-white/3 rounded-full blur-md"></div>
+        <div className="absolute top-1/2 left-1/3 w-8 h-8 bg-white/3 rounded-full blur-sm"></div>
       </div>
     </header>
   );
