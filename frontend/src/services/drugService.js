@@ -1,52 +1,40 @@
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
 const API_BASE_URL = 'https://medivize-backend.netlify.app/api'; 
 
-// Create an Axios instance with a base URL
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    // Default content type for most requests.
-    // This will be overridden for FormData requests by Axios itself,
-    // but we'll explicitly set it for classifyDrugImage for clarity/strictness.
     'Content-Type': 'application/json', 
   },
 });
 
 export const classifyDrugImage = async (imageFile) => {
   const formData = new FormData();
-  formData.append('image', imageFile); // Ensure the field name is 'image' as required by the backend
+  formData.append('image', imageFile);
 
-  // Log FormData contents for debugging
   for (let pair of formData.entries()) {
       console.log(pair[0]+ ', ' + pair[1]); 
   }
 
   try {
-    // Explicitly set Content-Type for this request.
-    // Axios typically handles this automatically for FormData, but being explicit can help with strict backends.
     const response = await api.post('/drugs/classify', formData, {
       headers: {
-        'Content-Type': 'multipart/form-data', // Crucial for file uploads
+        'Content-Type': 'multipart/form-data', 
       },
     });
 
-    // Axios wraps the response data in `response.data`
     return { success: true, data: response.data.data };
   } catch (error) {
     console.error('Image classification error:', error);
-    // Axios error handling: error.response for HTTP errors, error.message for network errors
     if (error.response) {
-      // Server responded with a status other than 2xx
       return { 
         success: false, 
         message: error.response.data.message || `Klasifikasi gambar gagal dengan status ${error.response.status}` 
       };
     } else if (error.request) {
-      // Request was made but no response was received
       return { success: false, message: 'Tidak ada respons dari server. Periksa koneksi internet Anda.' };
     } else {
-      // Something happened in setting up the request that triggered an Error
       return { success: false, message: `Kesalahan: ${error.message}` };
     }
   }
@@ -54,12 +42,12 @@ export const classifyDrugImage = async (imageFile) => {
 
 export const getDrugByName = async (drugName) => {
   try {
-    console.log('Requesting drug:', drugName); // Debug log
+    console.log('Requesting drug:', drugName); 
     
     const encodedName = encodeURIComponent(drugName);
     const url = `/drugs/by-name/${encodedName}`;
     
-    console.log('Request URL:', `${API_BASE_URL}${url}`); // Debug log
+    console.log('Request URL:', `${API_BASE_URL}${url}`);
     
     const response = await api.get(url);
 

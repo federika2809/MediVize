@@ -17,7 +17,7 @@ function GuidePage() {
     {
       title: "Klasifikasi Obat dari Foto",
       icon: <Camera className="w-6 h-6" />,
-      color: "bg-gradient-to-r from-teal-500 to-teal-600",
+      color: "bg-cyan-500",
       steps: [
         "Buka halaman \"Klasifikasi\" dari navigasi utama.",
         "Pilih opsi \"Ambil Foto\" untuk menggunakan kamera perangkat Anda, atau \"Unggah Gambar\" untuk memilih gambar dari galeri.",
@@ -30,7 +30,7 @@ function GuidePage() {
     {
       title: "Pencarian Obat Berbasis Teks",
       icon: <Search className="w-6 h-6" />,
-      color: "bg-gradient-to-r from-teal-600 to-cyan-600",
+      color: "bg-cyan-500",
       steps: [
         "Pada halaman \"Cari Obat\", temukan bagian \"Pencarian Informasi Obat\".",
         "Masukkan nama obat atau kategori obat (misalnya, \"Acretin\", \"Adol\") di kolom pencarian.",
@@ -42,7 +42,7 @@ function GuidePage() {
     {
       title: "Memahami Informasi Obat",
       icon: <BookOpen className="w-6 h-6" />,
-      color: "bg-gradient-to-r from-cyan-500 to-teal-500",
+      color: "bg-cyan-500",
       info: [
         { label: "Kegunaan", desc: "Untuk apa obat tersebut diresepkan atau digunakan.", icon: <Info className="w-4 h-4" /> },
         { label: "Dosis", desc: "Informasi tentang berapa banyak dan seberapa sering obat harus dikonsumsi.", icon: <FileText className="w-4 h-4" /> },
@@ -60,16 +60,16 @@ function GuidePage() {
         
        
         <div className="text-center mb-12 sm:mb-16">
-          <div className={`inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mb-4 sm:mb-6 shadow-lg transition-all duration-700 delay-200 ${isVisible ? 'scale-100' : 'scale-0'}`}>
+          <div className={`inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-cyan-500 rounded-full mb-4 sm:mb-6 shadow-lg transition-all duration-700 delay-200 ${isVisible ? 'scale-100' : 'scale-0'}`}>
             <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </div>
           
-          <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-3 sm:mb-4 px-4 leading-tight transition-all duration-800 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-800 mb-3 sm:mb-4 px-4 leading-tight transition-all duration-800 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
             Panduan Lengkap MediVize<br className="sm:hidden" />
             
           </h1>
           
-          <p className={`text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4 leading-relaxed transition-all duration-800 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+          <p className={`text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4 leading-relaxed transition-all duration-800 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
             Pelajari cara menggunakan semua fitur MediVize untuk mengidentifikasi dan mendapatkan informasi obat dengan mudah dan akurat
           </p>
         </div>
@@ -93,7 +93,7 @@ function GuidePage() {
                         {section.icon}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h2 className="text-lg sm:text-xl md:text-2xl font-bold leading-tight break-words">
+                        <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight break-words">
                           <span className="block sm:inline">{index + 1}. </span>
                           <span className="block sm:inline">{section.title}</span>
                         </h2>
@@ -120,17 +120,17 @@ function GuidePage() {
                       {section.steps.map((step, stepIndex) => (
                         <div
                           key={stepIndex}
-                          className={`flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-teal-50 transition-all duration-200 ${
+                          className={`flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-cyan-50 transition-all duration-200 ${
                             expandedSection === index 
                               ? 'opacity-100 translate-x-0' 
                               : 'opacity-0 -translate-x-5'
                           }`}
                           style={{ transitionDelay: `${stepIndex * 100}ms` }}
                         >
-                          <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">
+                          <div className="flex-shrink-0 w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 bg-cyan-500 text-white rounded-full flex items-center justify-center text-xs sm:text-sm md:text-base font-bold">
                             {stepIndex + 1}
                           </div>
-                          <p className="text-gray-700 leading-relaxed text-sm sm:text-base font-medium">{step}</p>
+                          <p className="text-gray-700 leading-relaxed text-xs sm:text-sm md:text-base lg:text-lg font-medium">{step}</p>
                         </div>
                       ))}
                     </div>
@@ -141,7 +141,7 @@ function GuidePage() {
                       {section.info.map((item, itemIndex) => (
                         <div
                           key={itemIndex}
-                          className={`p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-teal-50 transition-all duration-300 ${
+                          className={`p-3 sm:p-4 bg-gray-50 rounded-xl hover:bg-cyan-50 transition-all duration-300 ${
                             expandedSection === index 
                               ? 'opacity-100 translate-y-0' 
                               : 'opacity-0 translate-y-5'
@@ -149,12 +149,12 @@ function GuidePage() {
                           style={{ transitionDelay: `${itemIndex * 100}ms` }}
                         >
                           <div className="flex items-start space-x-3">
-                            <div className="flex-shrink-0 p-2 bg-teal-100 text-teal-600 rounded-lg">
+                            <div className="flex-shrink-0 p-2 bg-cyan-100 text-cyan-600 rounded-lg">
                               {item.icon}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h4 className="font-bold text-gray-800 mb-1 text-sm sm:text-base">{item.label}</h4>
-                              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-medium">{item.desc}</p>
+                              <h4 className="font-bold text-gray-800 mb-1 text-xs sm:text-sm md:text-base">{item.label}</h4>
+                              <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed font-medium">{item.desc}</p>
                             </div>
                           </div>
                         </div>
@@ -174,14 +174,14 @@ function GuidePage() {
         </div>
 
         
-        <div className={`mt-8 sm:mt-12 p-4 sm:p-6 md:p-8 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl shadow-lg transition-all duration-800 delay-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className={`mt-8 sm:mt-12 p-4 sm:p-6 md:p-8 bg-red-50 border border-red-200 rounded-2xl shadow-lg transition-all duration-800 delay-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="flex items-start space-x-3 sm:space-x-4">
             <div className="flex-shrink-0 p-2 sm:p-3 bg-red-100 text-red-600 rounded-full">
               <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-lg sm:text-xl font-bold text-red-800 mb-2">Peringatan Penting</h3>
-              <p className="text-red-700 leading-relaxed text-sm sm:text-base font-medium">
+              <h3 className="text-base sm:text-lg md:text-xl font-bold text-red-800 mb-2">Peringatan Penting</h3>
+              <p className="text-red-700 leading-relaxed text-xs sm:text-sm md:text-base font-medium">
                 Informasi yang disediakan MediVize adalah sebagai alat bantu edukasi dan referensi. 
                 Selalu konsultasikan dengan dokter, apoteker, atau tenaga kesehatan profesional 
                 untuk nasihat medis yang akurat dan sesuai dengan kondisi Anda.

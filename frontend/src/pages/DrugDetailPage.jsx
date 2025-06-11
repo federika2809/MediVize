@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDrugByName, debugDrugSearch } from '../services/drugService';
@@ -13,6 +12,7 @@ function DrugDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [debugInfo, setDebugInfo] = useState(null);
+    
 
     useEffect(() => {
         const fetchDrugDetails = async () => {
@@ -114,7 +114,7 @@ function DrugDetailPage() {
                 <div className="mb-6">
                     <button
                         onClick={handleGoBack}
-                        className="text-blue-600 hover:text-blue-800 flex items-center gap-2 transition-colors"
+                        className="text-cyan-600 hover:text-cyan-800 flex items-center gap-2 transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -144,7 +144,7 @@ function DrugDetailPage() {
                         <div className="flex justify-center gap-3 mt-4">
                             <button
                                 onClick={handleTryAgain}
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                                className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition-colors"
                             >
                                 Coba Lagi
                             </button>
@@ -167,7 +167,7 @@ function DrugDetailPage() {
                 <div className="mb-6">
                     <button
                         onClick={handleGoBack}
-                        className="text-blue-600 hover:text-blue-800 flex items-center gap-2 transition-colors"
+                        className="text-cyan-600 hover:text-cyan-800 flex items-center gap-2 transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -180,7 +180,7 @@ function DrugDetailPage() {
                     <p>Data obat tidak tersedia.</p>
                     <button
                         onClick={handleGoBack}
-                        className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                        className="mt-4 bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                         Kembali
                     </button>
@@ -194,7 +194,7 @@ function DrugDetailPage() {
             <div className="mb-6">
                 <button
                     onClick={handleGoBack}
-                    className="text-blue-600 hover:text-blue-800 flex items-center gap-2 transition-colors"
+                    className="text-cyan-600 hover:text-cyan-800 flex items-center gap-2 transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

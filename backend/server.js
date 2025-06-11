@@ -1,18 +1,16 @@
-// MEDIVIZE/backend/server.js
 const express = require("express");
 const mysql = require("mysql2/promise");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs").promises; // Using promises version of fs
-const axios = require("axios"); // To make HTTP requests to ML API
-const FormData = require("form-data"); // To send multipart/form-data
+const fs = require("fs").promises; 
+const axios = require("axios"); 
+const FormData = require("form-data"); 
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// --- CORS Configuration ---
 app.use(
   cors({
     origin: [
@@ -29,11 +27,8 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Note: Static serving from /uploads is mainly for local dev.
-// The new implementation sends the image as Base64, which works everywhere.
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// --- Database Connection Pool ---
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "sql12.freesqldatabase.com",
   user: process.env.DB_USER || "sql12722940",
@@ -56,7 +51,6 @@ pool
     console.error("✗ Database connection failed:", err.message);
   });
 
-// --- Multer Storage Configuration ---
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = "/tmp/uploads";
@@ -75,7 +69,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
     const extname = allowedTypes.test(
@@ -90,7 +84,6 @@ const upload = multer({
   },
 });
 
-// --- Data Formatting Function ---
 const formatDrugData = (drugRow) => {
   if (!drugRow) return null;
   return {
@@ -107,14 +100,10 @@ const formatDrugData = (drugRow) => {
   };
 };
 
-// --- API Routes ---
-
-// Health Check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "MEDIVIZE Backend is running" });
 });
 
-// Get all drugs
 app.get("/api/drugs", async (req, res) => {
   try {
     const [rows] = await pool.execute("SELECT * FROM drugs ORDER BY Name ASC");
@@ -127,7 +116,6 @@ app.get("/api/drugs", async (req, res) => {
   }
 });
 
-// Get drug by name
 app.get("/api/drugs/by-name/:name", async (req, res) => {
   try {
     const { name } = req.params;
@@ -149,7 +137,6 @@ app.get("/api/drugs/by-name/:name", async (req, res) => {
   }
 });
 
-// Search drugs
 app.get("/api/drugs/search", async (req, res) => {
   try {
     const { q } = req.query;
@@ -171,7 +158,6 @@ app.get("/api/drugs/search", async (req, res) => {
   }
 });
 
-// --- Image Classification Route (INTEGRATED WITH ML API) ---
 app.post("/api/drugs/classify", upload.single("image"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
@@ -186,18 +172,15 @@ app.post("/api/drugs/classify", upload.single("image"), async (req, res) => {
   const ML_API_PASSWORD = "testpass";
 
   try {
-    // 1. Prepare image to send to ML API
     const imageFileStream = require("fs").createReadStream(imagePath);
     const formData = new FormData();
     formData.append("file", imageFileStream, req.file.originalname);
 
-    // 2. [NEW] Read image file into a buffer to create a Base64 string for the response
     const imageBuffer = await fs.readFile(imagePath);
     const imageBase64 = `data:${
       req.file.mimetype
     };base64,${imageBuffer.toString("base64")}`;
 
-    // 3. Call ML API
     console.log(`Calling ML API at ${ML_API_URL}`);
     const mlResponse = await axios.post(ML_API_URL, formData, {
       headers: {
@@ -214,16 +197,14 @@ app.post("/api/drugs/classify", upload.single("image"), async (req, res) => {
     console.log("ML API Response:", mlResponse.data);
     const { predicted_class, confidence } = mlResponse.data;
 
-    // 4. [UPDATED] Create the classification result with Base64 image
     const classificationResult = {
       drugName: predicted_class || "Tidak Dikenali",
       confidence: confidence !== undefined ? parseFloat(confidence) : 0.0,
-      imageBase64: imageBase64, // Send the cached image data back to the frontend
+      imageBase64: imageBase64, 
       processedAt: new Date().toISOString(),
       drugDetails: null,
     };
 
-    // 5. If drug is recognized, fetch details from local DB
     if (
       classificationResult.drugName &&
       classificationResult.drugName !== "Tidak Dikenali"
@@ -237,7 +218,6 @@ app.post("/api/drugs/classify", upload.single("image"), async (req, res) => {
       }
     }
 
-    // 6. Send final response to frontend
     res.json({
       success: true,
       data: classificationResult,
@@ -257,7 +237,6 @@ app.post("/api/drugs/classify", upload.single("image"), async (req, res) => {
     }
     res.status(502).json({ success: false, message: userMessage });
   } finally {
-    // Ensure the temporary file is always deleted
     if (imagePath) {
       await fs
         .unlink(imagePath)
@@ -268,10 +247,6 @@ app.post("/api/drugs/classify", upload.single("image"), async (req, res) => {
   }
 });
 
-// --- Other CRUD routes (add, update, delete) ---
-// (No changes to the routes below)
-
-// Add a new drug
 app.post("/api/drugs", async (req, res) => {
   try {
     const {
@@ -325,7 +300,6 @@ app.post("/api/drugs", async (req, res) => {
   }
 });
 
-// Update a drug by name
 app.put("/api/drugs/by-name/:name", async (req, res) => {
   try {
     const { name } = req.params;
@@ -351,7 +325,6 @@ app.put("/api/drugs/by-name/:name", async (req, res) => {
       });
     }
 
-    // This logic can be simplified or improved, but remains for now
     const sideEffectsStr = Array.isArray(sideEffects)
       ? sideEffects.join(", ")
       : sideEffects;
@@ -376,7 +349,6 @@ app.put("/api/drugs/by-name/:name", async (req, res) => {
   }
 });
 
-// Delete a drug by name
 app.delete("/api/drugs/by-name/:name", async (req, res) => {
   try {
     const { name } = req.params;
@@ -395,7 +367,6 @@ app.delete("/api/drugs/by-name/:name", async (req, res) => {
   }
 });
 
-// --- Error Handling & 404 Middleware ---
 app.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     return res.status(400).json({
@@ -417,7 +388,6 @@ app.use("*", (req, res) => {
     .json({ success: false, message: "Endpoint tidak ditemukan." });
 });
 
-// --- Start Server ---
 app.listen(PORT, () => {
   console.log(`✓ MEDIVIZE Backend server running on port ${PORT}`);
 });

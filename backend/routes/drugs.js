@@ -46,7 +46,7 @@ router.get('/drugs/by-name/:name', async (req, res) => {
     const { name } = req.params;
     const decodedName = decodeURIComponent(name);
     
-    console.log('Searching for drug:', decodedName); // Debug log
+    console.log('Searching for drug:', decodedName); 
     
     const [rows] = await db.execute(
       'SELECT * FROM drugs WHERE Name = ? OR Name LIKE ? LIMIT 1',
@@ -54,7 +54,7 @@ router.get('/drugs/by-name/:name', async (req, res) => {
     );
     
     if (rows.length === 0) {
-      console.log('No drug found for:', decodedName); // Debug log
+      console.log('No drug found for:', decodedName); 
       return res.status(404).json({
         success: false,
         message: `Obat dengan nama '${decodedName}' tidak ditemukan dalam database.`
@@ -62,7 +62,7 @@ router.get('/drugs/by-name/:name', async (req, res) => {
     }
     
     const formattedDrug = formatDrugData(rows[0]);
-    console.log('Found drug:', formattedDrug.name); // Debug log
+    console.log('Found drug:', formattedDrug.name); 
     
     res.json({
       success: true,
