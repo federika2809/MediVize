@@ -10,7 +10,7 @@ import {
 
 const Button = ({ children, variant = 'primary', className = '' }) => {
   const baseClasses =
-    'font-semibold py-4 px-8 rounded-xl transition-all duration-300 ease-in-out shadow-lg focus:outline-none focus:ring-4 transform hover:scale-105 active:scale-95 relative overflow-hidden group text-base';
+    'font-semibold py-2 px-4 sm:py-3 md:py-4 sm:px-6 md:px-8 rounded-xl transition-all duration-300 ease-in-out shadow-lg focus:outline-none focus:ring-4 transform hover:scale-105 active:scale-95 relative overflow-hidden group text-sm sm:text-base';
 
   const variants = {
     primary:
@@ -21,9 +21,9 @@ const Button = ({ children, variant = 'primary', className = '' }) => {
 
   return (
     <button className={`${baseClasses} ${variants[variant]} ${className}`}>
-      <span className="relative z-10 flex items-center justify-center gap-2">
+      <span className="relative z-10 flex items-center justify-center gap-1 sm:gap-2">
         {children}
-        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
       </span>
       <div className="absolute inset-0 bg-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </button>
@@ -114,7 +114,6 @@ function HomePage() {
     <div className="">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-       
         {particles.map((particle) => (
           <div
             key={particle.id}
@@ -131,7 +130,7 @@ function HomePage() {
         {/* Hero Section */}
         <section className="text-center mb-20">
           <div className="max-w-5xl mx-auto">
-           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight mt-[-20px]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight mt-[-20px]">
               <span className="block text-gray-800 mb-2">Foto Kemasan,</span>
               <span className="block text-gray-800 mb-2">Temukan Jawaban.</span>
               <span className="block bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent mb-2"></span>
@@ -143,24 +142,25 @@ function HomePage() {
               aman dan mandiri.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-              <a href="/classify">
-                <Button variant="primary">
-                  <Camera className="w-5 h-5" />
-                  Mulai Deteksi Obat Anda
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-16">
+              <a href="/classify" className="w-full sm:w-auto">
+                <Button variant="primary" className="w-full sm:w-auto">
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="whitespace-nowrap">
+                    Mulai Deteksi Obat Anda
+                  </span>
                 </Button>
               </a>
-              <a href="/guide">
-                <Button variant="secondary">
-                  <Shield className="w-5 h-5" />
-                  Panduan Penggunaan
+              <a href="/guide" className="w-full sm:w-auto">
+                <Button variant="secondary" className="w-full sm:w-auto">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="whitespace-nowrap">Panduan Penggunaan</span>
                 </Button>
               </a>
             </div>
           </div>
         </section>
 
-       
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
@@ -194,7 +194,6 @@ function HomePage() {
           </div>
         </section>
 
-      
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
