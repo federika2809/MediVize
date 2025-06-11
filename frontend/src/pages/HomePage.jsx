@@ -130,7 +130,8 @@ function HomePage() {
         {/* Hero Section */}
         <section className="text-center mb-20">
           <div className="max-w-5xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight mt-[-20px]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight mt-[-20px]
+">
               <span className="block text-gray-800 mb-2">Foto Kemasan,</span>
               <span className="block text-gray-800 mb-2">Temukan Jawaban.</span>
               <span className="block bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent mb-2"></span>
