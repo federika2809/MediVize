@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+// Button component untuk konsistensi
 function Button({ children, onClick, variant = "primary", className = "" }) {
   const baseClasses = "px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2";
   
