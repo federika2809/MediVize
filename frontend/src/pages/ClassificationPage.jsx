@@ -35,6 +35,7 @@ function ClassificationPage() {
             const result = await classifyDrugImage(selectedImage);
 
             if (result.success && result.data) {
+                // Format hasil untuk konsistensi
                 const resultData = {
                     ...result.data,
                     drugName: result.data.drugName || result.data.name || result.data.predicted_class,
@@ -93,6 +94,7 @@ const AccuracyIndicator = ({ confidence }) => {
   const safeConfidence = isNaN(confidence) || confidence == null ? 0 : confidence;
   const percentage = Math.round(safeConfidence * 100);
 
+  // Tentukan warna dan level berdasarkan tingkat akurasi
   let colorClass = '';
   let levelText = '';
 
