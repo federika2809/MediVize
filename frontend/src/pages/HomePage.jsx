@@ -111,10 +111,10 @@ function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-cyan-50/30 to-white">
+    <div className="">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Floating Particles */}
+       
         {particles.map((particle) => (
           <div
             key={particle.id}
@@ -131,7 +131,7 @@ function HomePage() {
         {/* Hero Section */}
         <section className="text-center mb-20">
           <div className="max-w-5xl mx-auto">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight mt-[-20px]">
               <span className="block text-gray-800 mb-2">Foto Kemasan,</span>
               <span className="block text-gray-800 mb-2">Temukan Jawaban.</span>
               <span className="block bg-gradient-to-r from-cyan-600 to-cyan-500 bg-clip-text text-transparent mb-2"></span>
@@ -160,7 +160,7 @@ function HomePage() {
           </div>
         </section>
 
-        {/* Features Section */}
+       
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
@@ -176,7 +176,7 @@ function HomePage() {
             <FeatureCard
               icon={Camera}
               title="Deteksi Instan"
-              description="Menggunakan computer vision untuk mengenali berbagai obat melalui foto kemasan, dengan tingkat akurasi yang terus ditingkatkan."
+              description="Menggunakan computer vision untuk mengenali berbagai obat melalui foto kemasan, dengan tingkat akurasi yang terus ditingkatkan"
               delay={0.1}
             />
             <FeatureCard
@@ -188,13 +188,13 @@ function HomePage() {
             <FeatureCard
               icon={Search}
               title="Database 150 Obat"
-              description="Memiliki database sederhana dengan 150 obat, yang akan terus diperbarui dan diperluas."
+              description="Memiliki database sederhana dengan 150 obat, yang akan terus diperbarui dan diperluas"
               delay={0.3}
             />
           </div>
         </section>
 
-        {/* How It Works Section */}
+      
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">

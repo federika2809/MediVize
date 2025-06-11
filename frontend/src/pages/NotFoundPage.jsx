@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+
 function Button({ children, onClick, variant = "primary", className = "" }) {
   const baseClasses = "px-6 py-3 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2";
   
@@ -18,6 +19,7 @@ function Button({ children, onClick, variant = "primary", className = "" }) {
     </button>
   );
 }
+
 
 function Link({ to, children }) {
   return (
