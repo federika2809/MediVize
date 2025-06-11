@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getDrugByName, debugDrugSearch } from '../services/drugService';
 import DrugInfoCard from '../components/drug/DrugInfoCard';
-import { AlertTriangle, Search, ArrowLeft, RefreshCw, Home, Camera, Info } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, RefreshCw, Camera, Info } from 'lucide-react';
 
 function DrugDetailPage() {
     const { id } = useParams(); 
@@ -15,7 +15,7 @@ function DrugDetailPage() {
     useEffect(() => {
         const fetchDrugDetails = async () => {
             if (!id) {
-                console.error('URL parameter "id" (nama obat) is undefined or empty.');
+                console.error('URL parameter "id" is undefined or empty.');
                 setError('Nama obat tidak valid atau tidak ditemukan di URL. Kembali ke halaman utama.');
                 setLoading(false);
                 return;
@@ -26,6 +26,7 @@ function DrugDetailPage() {
 
             try {
                 const decodedDrugName = decodeURIComponent(id);
+
                 console.log('=== DRUG DETAIL PAGE DEBUG ===');
                 console.log('Raw param (id from URL):', id);
                 console.log('Decoded Drug Name for Search:', decodedDrugName);
@@ -35,6 +36,7 @@ function DrugDetailPage() {
                 setDebugInfo(debugResult);
 
                 const result = await getDrugByName(searchName);
+
                 if (result.success && result.data) {
                     setDrug(result.data);
                 } else {
@@ -58,14 +60,17 @@ function DrugDetailPage() {
     const handleTryAgain = async () => {
         setLoading(true);
         setError('');
+
         try {
             if (!id) {
                 setError('Tidak ada nama obat yang valid untuk dicoba lagi.');
                 setLoading(false);
                 return;
             }
+
             const decodedDrugName = decodeURIComponent(id);
             const result = await getDrugByName(decodedDrugName);
+
             if (result.success && result.data) {
                 setDrug(result.data);
             } else {
@@ -92,6 +97,7 @@ function DrugDetailPage() {
 
     if (error) {
         const drugName = id ? decodeURIComponent(id) : 'Obat yang dicari';
+
         return (
             <div className="min-h-screen bg-gray-50 px-4 py-6 md:py-8">
                 <div className="max-w-4xl mx-auto">
@@ -126,7 +132,7 @@ function DrugDetailPage() {
                                 </div>
                                 <p className="text-gray-600 text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
                                     Maaf, obat ini belum terdaftar dalam database kami yang saat ini berisi
-                                    <span className="font-semibold text-cyan-600"> 150 jenis obat. </span>
+                                    <span className="font-semibold text-cyan-600"> 150 jenis obat.</span>
                                 </p>
                             </div>
 
@@ -137,50 +143,18 @@ function DrugDetailPage() {
                                         Kemungkinan Penyebab
                                     </h3>
                                     <div className="space-y-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                                            <p className="text-gray-700 text-sm md:text-base">
-                                                Nama obat tidak terdeteksi dengan tepat dari foto
-                                            </p>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                                            <p className="text-gray-700 text-sm md:text-base">
-                                                Obat belum tersedia dalam database kami
-                                            </p>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                                            <p className="text-gray-700 text-sm md:text-base">
-                                                Kualitas foto kemasan kurang jelas
-                                            </p>
-                                        </div>
+                                        <p className="text-gray-700 text-sm md:text-base">• Nama obat tidak terdeteksi dengan tepat dari foto</p>
+                                        <p className="text-gray-700 text-sm md:text-base">• Obat belum tersedia dalam database kami</p>
+                                        <p className="text-gray-700 text-sm md:text-base">• Kualitas foto kemasan kurang jelas</p>
                                     </div>
                                 </div>
 
                                 <div className="bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl p-5 md:p-6">
-                                    <h3 className="font-bold text-gray-800 mb-4 text-sm md:text-base">
-                                        Saran untuk Anda
-                                    </h3>
+                                    <h3 className="font-bold text-gray-800 mb-4 text-sm md:text-base">Saran untuk Anda</h3>
                                     <div className="space-y-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                                            <p className="text-gray-700 text-sm md:text-base">
-                                                Foto ulang dengan pencahayaan lebih baik
-                                            </p>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                                            <p className="text-gray-700 text-sm md:text-base">
-                                                Pastikan nama obat terlihat jelas
-                                            </p>
-                                        </div>
-                                        <div className="flex items-start gap-3">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
-                                            <p className="text-gray-700 text-sm md:text-base">
-                                                Konsultasi dengan apoteker atau dokter
-                                            </p>
-                                        </div>
+                                        <p className="text-gray-700 text-sm md:text-base">• Foto ulang dengan pencahayaan lebih baik</p>
+                                        <p className="text-gray-700 text-sm md:text-base">• Pastikan nama obat terlihat jelas</p>
+                                        <p className="text-gray-700 text-sm md:text-base">• Konsultasi dengan apoteker atau dokter</p>
                                     </div>
                                 </div>
                             </div>
@@ -193,19 +167,13 @@ function DrugDetailPage() {
                                     <Camera className="w-4 h-4 md:w-5 md:h-5" />
                                     <span className="text-sm md:text-base">Foto Ulang</span>
                                 </button>
+
                                 <button
                                     onClick={handleTryAgain}
                                     className="w-full md:w-auto bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 md:py-3.5 px-6 md:px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                                 >
                                     <RefreshCw className="w-4 h-4 md:w-5 md:h-5" />
                                     <span className="text-sm md:text-base">Coba Lagi</span>
-                                </button>
-                                <button
-                                    onClick={handleGoHome}
-                                    className="w-full md:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 md:py-3.5 px-6 md:px-8 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                                >
-                                    <Home className="w-4 h-4 md:w-5 md:h-5" />
-                                    <span className="text-sm md:text-base">Beranda</span>
                                 </button>
                             </div>
                         </div>
@@ -215,17 +183,19 @@ function DrugDetailPage() {
         );
     }
 
+    // Successful State
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6 md:py-8">
             <div className="max-w-4xl mx-auto">
                 <button
                     onClick={handleGoBack}
-                    className="mb-4 md:mb-6 flex items-center gap-2 text-cyan-600 hover:text-cyan-700 transition-colors font-medium group"
+                    className="mb-4 flex items-center gap-2 text-cyan-600 hover:text-cyan-700 transition-colors font-medium group"
                 >
-                    <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     <span className="text-sm md:text-base">Kembali</span>
                 </button>
-                {drug && <DrugInfoCard data={drug} debug={debugInfo} />}
+
+                {drug && <DrugInfoCard drug={drug} debugInfo={debugInfo} />}
             </div>
         </div>
     );
